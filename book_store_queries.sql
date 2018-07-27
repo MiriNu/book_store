@@ -6,7 +6,7 @@ LEFT JOIN inventory ON books.book_id = inventory.book_id
 WHERE inventory.amount > 0;
 
 /*2. Show all open orders */
-SELECT order_id, order_date, cust_id, supp_id, book_id, b_name, amount, tot_price, stat_type
+SELECT order_id, order_date, cust_id, supp_id, book_id, title, amount, tot_price, stat_type
 FROM
 	(
     SELECT *
@@ -42,7 +42,7 @@ FROM purchases
 WHERE (purch_date BETWEEN 'fromDate' AND 'tilDate');
 
 /*6. Show all books available for global sale*/
-SELECT *
+SELECT book_id, title, author_name, price AS original_price, (price*(100-discount)) AS disc_price
 FROM
 	(SELECT *
 	FROM store_items
@@ -51,5 +51,22 @@ FROM
 	SELECT *
 	FROM store_items
 	RIGHT JOIN books ON store_items.book_id=books.book_id)
-WHERE discount > 0;    
+WHERE discount > 0;
+
+/*7. Check if a given book: bookTitle + bookAuthor is available in the inventory*/
  
+SELECT book_id, amount
+FROM 
+	 (SELECT book_id
+	 FROM books
+	 WHERE title = 'bookTitle' AND author_name = 'bookAuthor') AS search_book
+RIGHT JOIN inventory ON search_book.book_id = inventory.book_id;    
+
+
+ /* 8. List of all suppliers of a given book: bookTitle + bookAuthor */
+ 
+SELECT *
+FROM 
+	 (SELECT book_id
+	 FROM books
+	 WHERE title = 'bookTitle' AND author_name = 'bookAuthor') AS search_book

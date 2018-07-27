@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS sellers (
 
 CREATE TABLE IF NOT EXISTS books (
 	book_id INT UNSIGNED NOT NULL PRIMARY KEY,
-    b_name VARCHAR(20),
+    title VARCHAR(20),
     author_name VARCHAR(50)
 );
 
