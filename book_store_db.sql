@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS purchases (
     purch_date DATE,
     canceled BOOL,
     origin_price DOUBLE,
-    payment DOUBLE
+    cust_pay DOUBLE
 );
 
 CREATE TABLE IF NOT EXISTS genres (
