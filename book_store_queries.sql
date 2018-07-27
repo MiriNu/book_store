@@ -139,4 +139,69 @@ FROM
 	FROM orders
 	WHERE (order_date BETWEEN 'fromDate' AND 'tilDate') AND cust_id != 0 AND status_id = 5);
  
-/*17. */
+/*15. show the total discount a customer received since a certain date*/
+SELECT SUM(discount) AS total_disc
+FROM 
+	  (SELECT origin_price - cust_pay AS discount
+	  FROM 
+			(SELECT *
+			FROM purchases
+			WHERE purch_date >= 'fromDate' AND cust_id = 'custID' AND cancled = false));
+                
+/*16. */
+SELECT cust_pay AS total_rev
+FROM (	SELECT SUM(cust_pay)
+		FROM purchases
+		WHERE (purch_date BETWEEN 'y'+'-01-01' AND 'y'+'-03-31') AND cancled = false
+        UNION
+        SELECT SUM(cust_pay)
+		FROM purchases
+		WHERE (purch_date BETWEEN 'y'+'-04-01' AND 'y'+'-06-30') AND cancled = false
+        UNION
+        SELECT SUM(cust_pay)
+		FROM purchases
+		WHERE (purch_date BETWEEN 'y'+'-07-01' AND 'y'+'-09-30') AND cancled = false
+        UNION
+        SELECT SUM(cust_pay)
+		FROM purchases
+		WHERE (purch_date BETWEEN 'y'+'-10-01' AND 'y'+'-12-31') AND cancled = false);
+        
+/*17. Show how many custs were added from given date: fromDate */
+
+SELECT *
+FROM
+	(SELECT cust_id
+	FROM
+		(SELECT *
+		FROM
+			(SELECT cust_id, MIN(purch_date) first_purch
+			FROM purchases
+			WHERE canceled = false)
+		GROUP BY cust_id)
+	WHERE first_purch >= fromDate) custs
+RIGHT JOIN customers ON customers.cust_id = custs.cust_id;
+        
+/*18. total amount paid to a given supplier: suppID, between given dates: fromDate, tilDate */
+SELECT SUM(tot_price) AS tot_shekels
+FROM (	SELECT *
+		FROM orders
+        WHERE supp_id = 'suppID' AND (order_date BETWEEN 'fromDate' AND 'tilDate'));
+        
+/*19. total amount a given seller: sellID earned between given dates: fromDate, tilDate */
+SELECT SUM(cust_pay) AS tot_shekels
+FROM (	SELECT *
+		FROM purchases
+        WHERE seller_id = 'sellID' AND (purch_date BETWEEN 'fromDate' AND 'tilDate') AND canceled = false);
+        
+/*20. top 10 most sold books between given dates: fromDate, tilDate */
+SELECT *
+FROM
+	(SELECT *
+	FROM 
+		(SELECT book_id, COUNT(*) AS amount
+		 FROM purchases
+		 WHERE purch_date BETWEEN 'fromDate' AND 'tilDate'
+		 GROUP BY book_id)
+	ORDER BY amount DESC) AS books_order
+LEFT JOIN books ON books.book_id = books_order.book_id
+LIMIT 10;

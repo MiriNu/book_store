@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS customers (
     first_name VARCHAR(20),
     last_name VARCHAR(20),
     phone VARCHAR(10),
-    date_added DATE/*,
-    tot_expense DOUBLE*/
+    date_added DATE
 );
 
 CREATE TABLE IF NOT EXISTS sellers (
