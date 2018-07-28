@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS customers (
     first_name VARCHAR(20),
     last_name VARCHAR(20),
     phone VARCHAR(10),
-    date_added DATE,
-    tot_expense DOUBLE
+    date_added DATE
 );
 
 CREATE TABLE IF NOT EXISTS sellers (
@@ -18,7 +17,7 @@ CREATE TABLE IF NOT EXISTS sellers (
 
 CREATE TABLE IF NOT EXISTS books (
 	book_id INT UNSIGNED NOT NULL PRIMARY KEY,
-    b_name VARCHAR(20),
+    title VARCHAR(20),
     author_name VARCHAR(50)
 );
 
@@ -42,7 +41,7 @@ CREATE TABLE IF NOT EXISTS purchases (
     purch_date DATE,
     canceled BOOL,
     origin_price DOUBLE,
-    payment DOUBLE
+    cust_pay DOUBLE
 );
 
 CREATE TABLE IF NOT EXISTS genres (
