@@ -178,7 +178,7 @@ FROM
 			FROM purchases
 			WHERE canceled = false)
 		GROUP BY cust_id)
-	WHERE first_purch >= fromDate) custs
+	WHERE first_purch >= 'fromDate') custs
 RIGHT JOIN customers ON customers.cust_id = custs.cust_id;
         
 /*18. total amount paid to a given supplier: suppID, between given dates: fromDate, tilDate */
