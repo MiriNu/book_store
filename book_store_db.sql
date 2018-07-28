@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS store_items (
 	FOREIGN KEY (book_id) REFERENCES books(book_id),
 	FOREIGN KEY (genre_id) REFERENCES genres(genre_id),    
     price DOUBLE,
-	discount INT /* % */
+	discount INT UNSIGNED /* % */
 );
 
 CREATE TABLE IF NOT EXISTS purchases (
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (book_id) REFERENCES store_items(book_id),
     FOREIGN KEY (supp_id) REFERENCES suppliers(supp_id),
     FOREIGN KEY (cust_id) REFERENCES customers(cust_id),
-    amount INT,
+    amount INT UNSIGNED,
     /*status ENUM ('not ordered yet','ordered','received','message sent to customer','sold','canceled'),*/
     FOREIGN KEY (status_id) REFERENCES order_status(status_id),
     order_date DATE,
@@ -89,6 +89,5 @@ CREATE TABLE IF NOT EXISTS book_prices (
 CREATE TABLE IF NOT EXISTS inventory (
 	book_id INT UNSIGNED,
 	FOREIGN KEY (book_id) REFERENCES store_items(book_id),
-    amount INT
+    amount INT UNSIGNED
 );
-
