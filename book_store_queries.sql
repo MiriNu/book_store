@@ -168,7 +168,7 @@ FROM (	SELECT SUM(cust_pay)
         
 /*17. Show how many custs were added from given date: fromDate */
 
-SELECT *
+SELECT COUNT(cust_id)
 FROM
 	(SELECT cust_id
 	FROM
