@@ -3,22 +3,21 @@ USE book_store;
 
 CREATE TABLE IF NOT EXISTS customers (
 	cust_id INT UNSIGNED NOT NULL PRIMARY KEY,
-    first_name VARCHAR(20),
-    last_name VARCHAR(20),
-    phone VARCHAR(10),
-    date_added DATE
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    phone VARCHAR(10)
 );
 
 CREATE TABLE IF NOT EXISTS sellers (
 	seller_id INT UNSIGNED NOT NULL PRIMARY KEY,
-    first_name VARCHAR(20),
-    last_name VARCHAR(20)
+    first_name VARCHAR(100),
+    last_name VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS books (
 	book_id INT UNSIGNED NOT NULL PRIMARY KEY,
-    title VARCHAR(20),
-    author_name VARCHAR(50)
+    title VARCHAR(100),
+    author_name VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS store_items (
@@ -46,13 +45,13 @@ CREATE TABLE IF NOT EXISTS purchases (
 
 CREATE TABLE IF NOT EXISTS genres (
 	genre_id INT UNSIGNED NOT NULL PRIMARY KEY,
-    g_name VARCHAR(20)
+    g_name VARCHAR(100)
 );
 
 
 CREATE TABLE IF NOT EXISTS order_status (
 	status_id INT UNSIGNED NOT NULL PRIMARY KEY,
-    stat_type VARCHAR(50)
+    stat_type VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS orders (
@@ -73,7 +72,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
 CREATE TABLE IF NOT EXISTS suppliers (
 	supp_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    supp_name VARCHAR(20),
+    supp_name VARCHAR(100),
     phone VARCHAR(10),
     bank_acc VARCHAR(10)
 );
