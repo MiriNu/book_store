@@ -55,10 +55,10 @@ int sumRevenue(int y);
 int customersAdded(date fromDate);
 
 //18. total amount paid to a given supplier: suppID, between given dates: fromDate, tilDate
-int totalPaidSupplier(unsigned int supID, date fromDate, date tilDate);
+int totalPaidSupplier(unsigned int suppID, date fromDate, date tilDate);
 
 //19. total amount a given seller: sellID earned between given dates: fromDate, tilDate
-int totalSoldSeller(unsigned int sellID, date fromDate date tilDate);
+int totalSoldSeller(unsigned int sellID, date fromDate, date tilDate);
 
 //20. top 10 most sold books between given dates: fromDate, tilDate
 int top10Books(date fromDate, date tilDate);
