@@ -177,7 +177,7 @@ FROM (
 );
 
 /*17. Show how many customers were added from given date: fromDate*/
-SELECT COUNT(cust_id)
+SELECT COUNT(cust_id) AS new_custs
 FROM (
 	SELECT cust_id
 	FROM (
@@ -190,8 +190,7 @@ FROM (
 		GROUP BY cust_id
 	)
 	WHERE first_purch >= 'fromDate'
-) AS custs
-RIGHT JOIN customers ON customers.cust_id = custs.cust_id;
+) AS custs;
 
 /*18. total amount paid to a given supplier: suppID, between given dates: fromDate, tilDate*/
 SELECT SUM(tot_price) AS tot_shekels
