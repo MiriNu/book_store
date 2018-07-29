@@ -140,18 +140,6 @@ FROM (	SELECT SUM(cust_pay)
 
 /*17. Show how many customers were added from given date: fromDate*/
 SELECT COUNT(cust_id)
-<<<<<<< HEAD
-FROM
-	(SELECT cust_id
-	FROM
-		(SELECT *
-		FROM
-			(SELECT cust_id, MIN(purch_date) first_purch
-			FROM purchases
-			WHERE canceled = false)
-		GROUP BY cust_id)
-	WHERE first_purch >= 'fromDate') custs
-=======
 FROM (	SELECT cust_id
 		FROM (	SELECT *
 				FROM (	SELECT cust_id, MIN(purch_date) first_purch
@@ -159,7 +147,6 @@ FROM (	SELECT cust_id
 						WHERE canceled = false)
 				GROUP BY cust_id)
 		WHERE first_purch >= 'fromDate') custs
->>>>>>> 15895217efc46455a7b93c16141ad377403996b4
 RIGHT JOIN customers ON customers.cust_id = custs.cust_id;
 
 /*18. total amount paid to a given supplier: suppID, between given dates: fromDate, tilDate*/
