@@ -2,6 +2,7 @@
 #define ACTIONS_H
 
 #include "db.h";
+#include <string>
 
 //1. Show all available books in inventory
 int showBooks();
@@ -16,7 +17,7 @@ int showCustomers();
 int showSuppliers();
 
 //5. Show all purchases between given dates: fromDate & tilDate
-int showPurchases(date fromDate, date tilDate);
+int showPurchases(string fromDate, string tilDate);
 
 //6. Show all books available for global sale
 int showBooksOnSale();
@@ -28,39 +29,39 @@ int searchBook(string bookTitle, string bookAuthor);
 int showSuppliersOfBook(string bookTitle, string bookAuthor);
 
 //9. How many books from type: bookTitle + bookAuthor where sold from date fromDate
-int booksSold(string bookTitle, string bookAuthor, date fromDate);
+int booksSold(string bookTitle, string bookAuthor, string fromDate);
 
 //10. How many books (different books too?) were purchased by customer: custID since given date fromDate
-int booksPurchased(unsigned int custID, date fromDate);
+int booksPurchased(unsigned int custID, string fromDate);
 
 //11. Show the customer details who bought the most since given date fromDate
-int mostPurchasesCustomer(date fromDate);
+int mostPurchasesCustomer(string fromDate);
 
 //12. show the supplier details who sold us the most books since given date fromDate
-int mostOrdersSuplier(date fromDate);
+int mostOrdersSuplier(string fromDate);
 
 //13. amount of orders made (and how many books?) between given dates: fromDate & tilDate
-int ordersMade(date fromDate, date tilDate);
+int ordersMade(string fromDate, string tilDate);
 
 //14. amount of orders made (and how many books?) between given dates: fromDate & tilDate that were made by customers sold
-int ordersMadePurchases(date fromDate, date tilDate);
+int ordersMadePurchases(string fromDate, string tilDate);
 
 //15. show the total discount a customer received since a certain date
-int totalDiscountCustomer(unsigned int custID, date fromDate);
+int totalDiscountCustomer(unsigned int custID, string fromDate);
 
 //16. sum revenue in Q1, Q2, Q3, Q4 in a given year: y
 int sumRevenue(int y);
 
 //17. Show how many customers were added from given date: fromDate
-int customersAdded(date fromDate);
+int customersAdded(string fromDate);
 
 //18. total amount paid to a given supplier: suppID, between given dates: fromDate, tilDate
-int totalPaidSupplier(unsigned int suppID, date fromDate, date tilDate);
+int totalPaidSupplier(unsigned int suppID, string fromDate, string tilDate);
 
 //19. total amount a given seller: sellID earned between given dates: fromDate, tilDate
-int totalSoldSeller(unsigned int sellID, date fromDate, date tilDate);
+int totalSoldSeller(unsigned int sellID, string fromDate, string tilDate);
 
 //20. top 10 most sold books between given dates: fromDate, tilDate
-int top10Books(date fromDate, date tilDate);
+int top10Books(string fromDate, string tilDate);
 
 #endif
