@@ -12,6 +12,8 @@
 
 NAMESPACES;
 int main(int argc, const char * argv[]) {
-
+	showBooks();
+	cout << endl;
+	showOrders();
 	return 0;
 }
