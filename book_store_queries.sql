@@ -23,7 +23,7 @@ FROM (
 	FROM stat_order
 	RIGHT JOIN books ON books.book_id = stat_order.book_id
 )
-WHERE (cust_id != 0 AND status_id != 5 AND status_id != 6) OR (cust_id = 0 AND status_id != 3 AND status_id != 6);
+WHERE (cust_id != NULL AND status_id != 5 AND status_id != 6) OR (cust_id = NULL AND status_id != 3 AND status_id != 6);
 
 /*3. List of all customers who made a purchase*/
 SELECT *
@@ -142,7 +142,7 @@ SELECT COUNT(order_id) orders_amount, SUM(amount) books_amount_ordered
 FROM (
 	SELECT *
 	FROM orders
-	WHERE (order_date BETWEEN 'fromDate' AND 'tilDate') AND cust_id != 0 AND status_id = 5
+	WHERE (order_date BETWEEN 'fromDate' AND 'tilDate') AND cust_id != NULL AND status_id = 5
 );
  
 /*15. show the total discount a customer received since a certain date*/

@@ -1,5 +1,47 @@
 CREATE DATABASE IF NOT EXISTS book_store;
-USE book_store;
+/*USE book_store;*/
+
+CREATE TABLE IF NOT EXISTS books (
+	book_id INT UNSIGNED NOT NULL PRIMARY KEY,
+    title VARCHAR(100),
+    author_name VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS genres (
+	genre_id INT UNSIGNED NOT NULL PRIMARY KEY,
+    g_name VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS store_items (
+	book_id INT UNSIGNED NOT NULL,
+    genre_id INT UNSIGNED NOT NULL,
+	FOREIGN KEY (book_id) REFERENCES books(book_id),
+	FOREIGN KEY (genre_id) REFERENCES genres(genre_id),    
+    price DOUBLE,
+	discount INT UNSIGNED /* % */
+);
+
+CREATE TABLE IF NOT EXISTS inventory (
+	book_id INT UNSIGNED,
+	FOREIGN KEY (book_id) REFERENCES store_items(book_id),
+    amount INT UNSIGNED
+);
+
+CREATE TABLE IF NOT EXISTS suppliers (
+	supp_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    supp_name VARCHAR(100),
+    phone VARCHAR(10),
+    bank_acc VARCHAR(10)
+);
+
+CREATE TABLE IF NOT EXISTS book_prices (
+	book_id INT UNSIGNED,
+    supp_id INT UNSIGNED,
+	FOREIGN KEY (supp_id) REFERENCES suppliers(supp_id),
+    FOREIGN KEY (book_id) REFERENCES store_items(book_id),
+    PRIMARY KEY (supp_id, book_id), /* check if this causes problems */
+    price DOUBLE
+);
 
 CREATE TABLE IF NOT EXISTS customers (
 	cust_id INT UNSIGNED NOT NULL PRIMARY KEY,
@@ -12,21 +54,6 @@ CREATE TABLE IF NOT EXISTS sellers (
 	seller_id INT UNSIGNED NOT NULL PRIMARY KEY,
     first_name VARCHAR(100),
     last_name VARCHAR(100)
-);
-
-CREATE TABLE IF NOT EXISTS books (
-	book_id INT UNSIGNED NOT NULL PRIMARY KEY,
-    title VARCHAR(100),
-    author_name VARCHAR(100)
-);
-
-CREATE TABLE IF NOT EXISTS store_items (
-	book_id INT UNSIGNED NOT NULL,
-    genre_id INT UNSIGNED NOT NULL,
-	FOREIGN KEY (book_id) REFERENCES books(book_id),
-	FOREIGN KEY (genre_id) REFERENCES genres(genre_id),    
-    price DOUBLE,
-	discount INT UNSIGNED /* % */
 );
 
 CREATE TABLE IF NOT EXISTS purchases (
@@ -42,12 +69,6 @@ CREATE TABLE IF NOT EXISTS purchases (
     origin_price DOUBLE,
     cust_pay DOUBLE
 );
-
-CREATE TABLE IF NOT EXISTS genres (
-	genre_id INT UNSIGNED NOT NULL PRIMARY KEY,
-    g_name VARCHAR(100)
-);
-
 
 CREATE TABLE IF NOT EXISTS order_status (
 	status_id INT UNSIGNED NOT NULL PRIMARY KEY,
@@ -68,26 +89,4 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (status_id) REFERENCES order_status(status_id),
     order_date DATE,
     tot_price DOUBLE
-);
-
-CREATE TABLE IF NOT EXISTS suppliers (
-	supp_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    supp_name VARCHAR(100),
-    phone VARCHAR(10),
-    bank_acc VARCHAR(10)
-);
-
-CREATE TABLE IF NOT EXISTS book_prices (
-	book_id INT UNSIGNED,
-    supp_id INT UNSIGNED,
-	FOREIGN KEY (supp_id) REFERENCES suppliers(supp_id),
-    FOREIGN KEY (book_id) REFERENCES store_items(book_id),
-    PRIMARY KEY (supp_id, book_id), /* check if this causes problems */
-    price DOUBLE
-);
-
-CREATE TABLE IF NOT EXISTS inventory (
-	book_id INT UNSIGNED,
-	FOREIGN KEY (book_id) REFERENCES store_items(book_id),
-    amount INT UNSIGNED
 );
