@@ -7,23 +7,15 @@ WHERE inventory.amount > 0;
 /*2. Show all open orders*/
 SELECT order_id, order_date, cust_id, supp_id, book_id, title, amount, tot_price, stat_type
 FROM (
-	SELECT *
-	FROM (
-		SELECT *
-		FROM orders
-		LEFT JOIN order_status ON orders.status_id = order_status.status_id
-		UNION
-		SELECT *
-		FROM orders
-		RIGHT JOIN order_status ON orders.status_id = order_status.status_id
+	SELECT order_id, order_date, cust_id, supp_id, books.book_id, title, amount, tot_price, stat_type, stat_order.status_id
+    FROM (
+		SELECT order_id, order_date, cust_id, supp_id, book_id, amount, tot_price, stat_type, orders.status_id
+        FROM orders
+        LEFT JOIN order_status ON orders.status_id = order_status.status_id
 	) AS stat_order
-	LEFT JOIN books ON books.book_id = stat_order.book_id
-	UNION
-	SELECT *
-	FROM stat_order
-	RIGHT JOIN books ON books.book_id = stat_order.book_id
-)
-WHERE (cust_id != NULL AND status_id != 5 AND status_id != 6) OR (cust_id = NULL AND status_id != 3 AND status_id != 6);
+    LEFT JOIN books ON books.book_id = stat_order.book_id
+) AS order_info
+WHERE (cust_id AND status_id != 5 AND status_id != 6) OR (cust_id IS NULL AND status_id != 3 AND status_id != 6);
 
 /*3. List of all customers who made a purchase*/
 SELECT *
@@ -45,16 +37,12 @@ FROM purchases
 WHERE (purch_date BETWEEN 'fromDate' AND 'tilDate');
 
 /*6. Show all books available for global sale*/
-SELECT book_id, title, author_name, price AS original_price, (price*(100-discount)/100) AS disc_price
+SELECT book_id, title, author_name, original_price, disc_price
 FROM (
-	SELECT *
+	SELECT books.book_id, title, author_name, price AS original_price, (price*(100-discount)/100) AS disc_price, discount
 	FROM store_items
 	LEFT JOIN books ON store_items.book_id=books.book_id
-	UNION
-	SELECT *
-	FROM store_items
-	RIGHT JOIN books ON store_items.book_id=books.book_id
-)
+) AS books_info
 WHERE discount > 0;
 
 /*7. Check if a given book: bookTitle + bookAuthor is available in the inventory*/
@@ -142,7 +130,7 @@ SELECT COUNT(order_id) orders_amount, SUM(amount) books_amount_ordered
 FROM (
 	SELECT *
 	FROM orders
-	WHERE (order_date BETWEEN 'fromDate' AND 'tilDate') AND cust_id != NULL AND status_id = 5
+	WHERE (order_date BETWEEN 'fromDate' AND 'tilDate') AND cust_id AND status_id = 5
 );
  
 /*15. show the total discount a customer received since a certain date*/

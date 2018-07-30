@@ -31,6 +31,17 @@ int showOrders() {
 	Connection *con = db.getConnection();
 	PreparedStatement *pstmt = con->prepareStatement("SELECT order_id, order_date, cust_id, supp_id, book_id, title, amount, tot_price, stat_type "
 													 "FROM ( "
+													 "	SELECT order_id, order_date, cust_id, supp_id, books.book_id, title, amount, tot_price, stat_type, stat_order.status_id "
+													 "	FROM ( "
+													 "		SELECT order_id, order_date, cust_id, supp_id, book_id, amount, tot_price, stat_type, orders.status_id "
+													 "		FROM orders "
+													 "		LEFT JOIN order_status ON orders.status_id = order_status.status_id "
+													 "	) AS stat_order "
+													 "	LEFT JOIN books ON books.book_id = stat_order.book_id "
+													 ") AS order_info "
+													 "WHERE(cust_id AND status_id != 5 AND status_id != 6) OR(cust_id IS NULL AND status_id != 3 AND status_id != 6);");
+	/*"SELECT order_id, order_date, cust_id, supp_id, book_id, title, amount, tot_price, stat_type "
+													 "FROM ( "
 													 "	SELECT * "
 													 "	FROM ( "
 													 "		SELECT * "
@@ -47,7 +58,7 @@ int showOrders() {
 													 "	FROM stat_order "
 													 "	RIGHT JOIN books ON books.book_id = stat_order.book_id "
 													 ") "
-													 "WHERE	(cust_id != NULL AND status_id != 5 AND status_id != 6) OR (cust_id = NULL AND status_id != 3 AND status_id != 6);");
+													 "WHERE	(cust_id != NULL AND status_id != 5 AND status_id != 6) OR (cust_id = NULL AND status_id != 3 AND status_id != 6);");*/
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
@@ -152,7 +163,14 @@ int showPurchases(string fromDate, string tilDate) {
 int showBooksOnSale() {
 	Database &db = Database::getInstance();
 	Connection *con = db.getConnection();
-	PreparedStatement *pstmt = con->prepareStatement("SELECT book_id, title, author_name, price AS original_price, (price * (100 - discount) / 100) AS disc_price "
+	PreparedStatement *pstmt = con->prepareStatement("SELECT book_id, title, author_name, original_price, disc_price "
+													 "FROM ( "
+													 "	SELECT books.book_id, title, author_name, price AS original_price, (price*(100 - discount) / 100) AS disc_price, discount "
+													 "	FROM store_items "
+													 "	LEFT JOIN books ON store_items.book_id = books.book_id "
+													 ") AS books_info "
+													 "WHERE discount > 0;");
+	/* "SELECT book_id, title, author_name, price AS original_price, (price * (100 - discount) / 100) AS disc_price "
 													 "FROM ( "
 													 "	SELECT * "
 													 "	FROM store_items "
@@ -162,7 +180,7 @@ int showBooksOnSale() {
 													 "	FROM store_items "
 													 "	RIGHT JOIN books ON store_items.book_id = books.book_id "
 													 ") "
-													 "WHERE discount > 0;");
+													 "WHERE discount > 0;");*/
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
@@ -395,7 +413,7 @@ int ordersMadePurchases(string fromDate, string tilDate) {
 													 "FROM ( "
 													 "	SELECT * "
 													 "	FROM orders "
-													 "	WHERE (order_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') AND cust_id != NULL AND status_id = 5 "
+													 "	WHERE (order_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') AND cust_id AND status_id = 5 "
 													 ");");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();

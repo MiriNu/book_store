@@ -15,5 +15,13 @@ int main(int argc, const char * argv[]) {
 	showBooks();
 	cout << endl;
 	showOrders();
+	cout << endl;
+	showCustomers();
+	cout << endl;
+	showSuppliers();
+	cout << endl;
+	showPurchases("2017-03-04", "2017-06-04");
+	cout << endl;
+	showBooksOnSale();
 	return 0;
 }
