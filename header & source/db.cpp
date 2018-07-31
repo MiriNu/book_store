@@ -9,7 +9,7 @@ Database::Database() : driver(get_driver_instance()) {
 	connection_properties["password"] = DB_PASS;
 	connection_properties["OPT_RECONNECT"] = true;
 
-	// use database
+	// use database, create tables and insert values.
 	try {
 		Connection *con = driver->connect(connection_properties);
 		try {
