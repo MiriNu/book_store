@@ -4,6 +4,9 @@
 #include "db.h"
 #include <string>
 
+//checks if the format of a string is yyyy-mm-tt, returns 0 if so and 1 otherwise
+bool validateDateFormat(string date);
+
 //1. Show all available books in inventory
 int showBooks();
 
@@ -50,7 +53,7 @@ int ordersMadePurchases(string fromDate, string tilDate);
 int totalDiscountCustomer(unsigned int custID, string fromDate);
 
 //16. sum revenue in Q1, Q2, Q3, Q4 in a given year: y
-int sumRevenue(int y);
+int sumRevenue(string y);
 
 //17. Show how many customers were added from given date: fromDate
 int customersAdded(string fromDate);
