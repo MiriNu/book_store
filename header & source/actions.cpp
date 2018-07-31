@@ -113,25 +113,23 @@ int showSuppliers() {
 int showPurchases(string fromDate, string tilDate) {
 	Database &db = Database::getInstance();
 	Connection *con = db.getConnection();
-	PreparedStatement *pstmt = con->prepareStatement("SELECT * "
-													 "FROM purchases "
-													 "WHERE (purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "');");
+	PreparedStatement *pstmt = con->prepareStatement("SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, canceled, cust_pay "
+													 "FROM ( "
+													 "	SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0, 'No', 'Yes') AS canceled, origin_price, cust_pay "
+													 "	FROM purchases "
+													 "	WHERE (purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') "
+													 ") AS purch "
+													 "LEFT JOIN books ON books.book_id = purch.book_id;");
+													 
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
 		cout << "There are no purchases in the given range of dates" << endl;
 	}
 	else {
-		cout << "Purchase ID\tBook ID\tSeller ID\tCustomer ID\tPurchase date\tCanceled\tOriginal price\tCustomer payment" << endl;
+		cout << "Purchase ID\tBook ID\tTitle\tSeller ID\tCustomer ID\tPurchase date\tCanceled\tPayment" << endl;
 		while (rset->next()) {
-			cout << rset->getUInt("purch_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getUInt("seller_id") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getString("purch_date") << "\t";
-			if (rset->getBoolean("canceled")) {
-				cout << "TRUE\t";
-			}
-			else {
-				cout << "FALSE\t";
-			}
-			cout << rset->getDouble("origin_price") << "\t" << rset->getDouble("cust_pay") << endl;
+			cout << rset->getUInt("purch_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getUInt("seller_id") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getString("purch_date") << "\t" << rset->getString("canceled") << "\t" << rset->getDouble("cust_pay") << endl;
 		}
 	}
 	delete pstmt;

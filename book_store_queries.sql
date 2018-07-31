@@ -33,13 +33,13 @@ FROM suppliers;
 
 /*5. Show all purchases between given dates: fromDate & tilDate*/
 /*instead of book id, show name. add customer name, replace 0 1 with yes no*/
-SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, cacnceled, cust_pay
-FROM
-	(SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0 , 'No', 'Yes') AS cacnceled, origin_price, cust_pay
+SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, canceled, cust_pay
+FROM (
+	SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0 , 'No', 'Yes') AS canceled, origin_price, cust_pay
 	FROM purchases
-	WHERE (purch_date BETWEEN '2017-01-01' AND '2018-01-01')) AS purch
+	WHERE (purch_date BETWEEN 'fromDate' AND 'tilDate')
+) AS purch
 LEFT JOIN books ON books.book_id = purch.book_id; 
-
 
 /*6. Show all books available for global sale*/
 SELECT book_id, title, author_name, original_price, disc_price
@@ -210,7 +210,7 @@ SELECT SUM(tot_price) AS tot_shekels
 FROM (
 	SELECT *
 	FROM orders
-	WHERE supp_id = 'suppID' AND (order_date BETWEEN 'fromDate' AND 'tilDate') AND status_id != 1 AND status_id != 6
+	WHERE supp_id = 'suppID' AND (order_date BETWEEN 'fromDate' AND 'tilDate') AND status_id != 1
 ) AS supp_orders;
 
 /*19. total amount a given seller: sellID earned between given dates: fromDate, tilDate*/
