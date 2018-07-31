@@ -25,7 +25,7 @@ FROM (
 	WHERE canceled = false
 	GROUP BY cust_id
 ) AS cust_who_bought
-RIGHT JOIN customers ON customers.cust_id = cust_who_bought.cust_id;
+LEFT JOIN customers ON customers.cust_id = cust_who_bought.cust_id;
 
 /*4. Show all suppliers*/
 SELECT *
@@ -51,40 +51,39 @@ FROM (
 WHERE discount > 0;
 
 /*7. Check if a given book: bookTitle + bookAuthor is available in the inventory*/
-SELECT search_book.book_id, amount
+SELECT inventory.book_id, title, author_name, amount
 FROM (
-	SELECT book_id
+	SELECT book_id, title, author_name
 	FROM books
 	WHERE title = 'bookTitle' AND author_name = 'bookAuthor'
 ) AS search_book
-RIGHT JOIN inventory ON search_book.book_id = inventory.book_id
-WHERE search_book.book_id IS NOT NULL;
+LEFT JOIN inventory ON search_book.book_id = inventory.book_id;
 
 /*8. List of all suppliers of a given book: bookTitle + bookAuthor*/
-SELECT *
+SELECT suppliers.supp_id, supp_name, phone, bank_acc, book_id, price
 FROM (
-	SELECT *
+	SELECT book_prices.book_id, supp_id, price
 	FROM (
 		SELECT book_id
 		FROM books
 		WHERE title = 'bookTitle' AND author_name = 'bookAuthor'
 	) AS search_book
-	RIGHT JOIN book_prices ON search_book.book_id = book_prices.book_id
+	LEFT JOIN book_prices ON search_book.book_id = book_prices.book_id
 ) AS supplied_books
-RIGHT JOIN suppliers ON suppliers.supp_id = supplied_books.supp_id;
+LEFT JOIN suppliers ON suppliers.supp_id = supplied_books.supp_id;
 
 /*9. How many books from type: bookTitle + bookAuthor where sold from date fromDate*/
-SELECT COUNT(*) AS books_sold
+SELECT COUNT(book_id) AS books_sold, title, author_name
 FROM (
-	SELECT *
+	SELECT purch_id, purchases.book_id, title, author_name, purch_date, canceled
 	FROM (
-		SELECT book_id
+		SELECT book_id, title, author_name
 		FROM books
 		WHERE title = 'bookTitle' AND author_name = 'bookAuthor'
 	) AS search_book
-	RIGHT JOIN purchases ON purchases.book_id = search_book.book_id
+	LEFT JOIN purchases ON purchases.book_id = search_book.book_id
 	WHERE purch_date >= 'fromDate' AND canceled = false
-);
+) AS books_purch;
 
 /*10. How many books (different books too?) were purchased by customer: custID since given date fromDate*/
 SELECT COUNT(book_id) AS tot_books, COUNT(DISTINCT book_id) AS diff_books
@@ -92,36 +91,40 @@ FROM (
 	SELECT *
 	FROM purchases
 	WHERE cust_id = 'custID' AND canceled = false AND purch_date >= 'fromDate'
-);
+) AS cust_purch;
 
 /*11. Show the customer details who bought the most since given date fromDate*/
 SELECT *
 FROM (
-	SELECT cust_id, MAX(book_amount) max_book_amount
+	SELECT *
 	FROM (
 		SELECT cust_id, COUNT(cust_id) book_amount
 		FROM (
 			SELECT *
 			FROM purchases
 			WHERE canceled = false AND purch_date >= 'fromDate'
-		)
+		) AS purch
 		GROUP BY cust_id
 	) AS custs_books
+    ORDER BY book_amount DESC
+    LIMIT 1
 ) AS top_cust
-RIGHT JOIN customers ON customers.cust_id = top_cust.cust_id;
+LEFT JOIN customers ON customers.cust_id = top_cust.cust_id;
 
 /*12. show the supplier details who sold us the most books since given date fromDate*/
 SELECT *
 FROM (
-	SELECT supp_id, max(amount)
+	SELECT *
 	FROM (
 		SELECT supp_id, SUM(amount) AS amount
 		FROM orders
 		WHERE order_date >= 'fromDate' AND  status_id != 1
 		GROUP BY supp_id
 	) AS supps_amounts
+    ORDER BY amount DESC
+    LIMIT 1
 ) AS max_supp
-RIGHT JOIN suppliers ON suppliers.supp_id = max_supp.supp_id;
+LEFT JOIN suppliers ON suppliers.supp_id = max_supp.supp_id;
 
 /*13. amount of orders made (and how many books?) between given dates: fromDate & tilDate*/
 SELECT COUNT(order_id) orders_amount, SUM(amount) books_amount_ordered
@@ -129,7 +132,7 @@ FROM (
 	SELECT *
 	FROM orders
 	WHERE (order_date BETWEEN 'fromDate' AND 'tilDate') AND status_id != 1
-);
+) AS orders_range;
 
 /*14. amount of orders made (and how many books?) between given dates: fromDate & tilDate that were made by customers sold*/
 SELECT COUNT(order_id) orders_amount, SUM(amount) books_amount_ordered
@@ -137,7 +140,7 @@ FROM (
 	SELECT *
 	FROM orders
 	WHERE (order_date BETWEEN 'fromDate' AND 'tilDate') AND cust_id AND status_id = 5
-);
+) AS orders_range;
  
 /*15. show the total discount a customer received since a certain date*/
 SELECT SUM(discount) AS total_disc
@@ -147,52 +150,68 @@ FROM (
 		SELECT *
 		FROM purchases
 		WHERE purch_date >= 'fromDate' AND cust_id = 'custID' AND canceled = false
-	)
-);
+	) AS purch_disc
+) AS disc_sum;
 
 /*16. sum revenue in Q1, Q2, Q3, Q4 in a given year: y*/
-SELECT cust_pay AS total_rev
+SELECT *
 FROM (
-	SELECT SUM(cust_pay)
-	FROM purchases
-	WHERE (purch_date BETWEEN 'y-01-01' AND 'y-03-31') AND canceled = false
-	UNION
-	SELECT SUM(cust_pay)
-	FROM purchases
-	WHERE (purch_date BETWEEN 'y-04-01' AND 'y-06-30') AND canceled = false
-	UNION
-	SELECT SUM(cust_pay)
-	FROM purchases
-	WHERE (purch_date BETWEEN 'y-07-01' AND 'y-09-30') AND canceled = false
-	UNION
-	SELECT SUM(cust_pay)
-	FROM purchases
-	WHERE (purch_date BETWEEN 'y-10-01' AND 'y-12-31') AND canceled = false
-);
+	SELECT *
+	FROM (
+		SELECT SUM(cust_pay) AS tot_Q1
+		FROM purchases
+		WHERE (purch_date BETWEEN 'y-01-01' AND 'y-03-31') AND canceled = false
+    ) AS Q1
+    LEFT JOIN (
+		SELECT *
+        FROM (
+			SELECT SUM(cust_pay) AS tot_Q2
+			FROM purchases
+			WHERE (purch_date BETWEEN 'y-04-01' AND 'y-06-30') AND canceled = false
+			) AS Q2
+    ) Q1Q2 ON (tot_Q1 OR tot_Q1 IS NULL)
+    LEFT JOIN (
+		SELECT *
+        FROM (
+			SELECT SUM(cust_pay) AS tot_Q3
+			FROM purchases
+			WHERE (purch_date BETWEEN 'y-07-01' AND 'y-09-30') AND canceled = false
+			) AS Q3
+    ) Q1Q2Q3 ON (tot_Q1 OR tot_Q1 IS NULL)
+    LEFT JOIN (
+		SELECT *
+        FROM (
+			SELECT SUM(cust_pay) AS tot_Q4
+			FROM purchases
+			WHERE (purch_date BETWEEN 'y-10-01' AND 'y-12-31') AND canceled = false
+			) AS Q4
+    ) Q1Q2Q3Q4 ON (tot_Q1 OR tot_Q1 IS NULL)
+) AS revenue;
 
 /*17. Show how many customers were added from given date: fromDate*/
-SELECT COUNT(cust_id) AS new_custs
+SELECT COUNT(cust_id) as new_custs
 FROM (
-	SELECT cust_id
+	SELECT *
 	FROM (
 		SELECT *
 		FROM (
-			SELECT cust_id, MIN(purch_date) first_purch
+			SELECT cust_id, purch_date
 			FROM purchases
 			WHERE canceled = false
-		)
-		GROUP BY cust_id
-	)
-	WHERE first_purch >= 'fromDate'
-) AS custs;
+		) AS cust_purch_date
+		ORDER BY purch_date ASC
+	) AS ordered_date
+	GROUP BY cust_id
+) AS count_cust
+WHERE purch_date >= 'fromDate';
 
 /*18. total amount paid to a given supplier: suppID, between given dates: fromDate, tilDate*/
 SELECT SUM(tot_price) AS tot_shekels
 FROM (
 	SELECT *
 	FROM orders
-	WHERE supp_id = 'suppID' AND (order_date BETWEEN 'fromDate' AND 'tilDate')
-);
+	WHERE supp_id = 'suppID' AND (order_date BETWEEN 'fromDate' AND 'tilDate') AND status_id != 1 AND status_id != 6
+) AS supp_orders;
 
 /*19. total amount a given seller: sellID earned between given dates: fromDate, tilDate*/
 SELECT SUM(cust_pay) AS tot_shekels
@@ -200,19 +219,19 @@ FROM (
 	SELECT *
 	FROM purchases
 	WHERE seller_id = 'sellID' AND (purch_date BETWEEN 'fromDate' AND 'tilDate') AND canceled = false
-);
+) AS seller_purch;
 
 /*20. top 10 most sold books between given dates: fromDate, tilDate*/
 SELECT *
 FROM (
-	SELECT *
+	SELECT books.book_id, title, author_name, amount
 	FROM (
 		SELECT book_id, COUNT(*) AS amount
 		FROM purchases
 		WHERE purch_date BETWEEN 'fromDate' AND 'tilDate'
 		GROUP BY book_id
-	)
-	ORDER BY amount DESC
+	) AS count_amount
+    LEFT JOIN books ON books.book_id = count_amount.book_id
 ) AS books_order
-LEFT JOIN books ON books.book_id = books_order.book_id
+ORDER BY amount DESC
 LIMIT 10;
