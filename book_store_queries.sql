@@ -18,7 +18,7 @@ FROM (
 WHERE (cust_id AND status_id != 5 AND status_id != 6) OR (cust_id IS NULL AND status_id != 3 AND status_id != 6);
 
 /*3. List of all customers who made a purchase*/
-SELECT *
+SELECT customers.cust_id, first_name, last_name, phone
 FROM (
 	SELECT cust_id
 	FROM purchases
@@ -32,9 +32,14 @@ SELECT *
 FROM suppliers;
 
 /*5. Show all purchases between given dates: fromDate & tilDate*/
-SELECT *
-FROM purchases
-WHERE (purch_date BETWEEN 'fromDate' AND 'tilDate');
+/*instead of book id, show name. add customer name, replace 0 1 with yes no*/
+SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, cacnceled, cust_pay
+FROM
+	(SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0 , 'No', 'Yes') AS cacnceled, origin_price, cust_pay
+	FROM purchases
+	WHERE (purch_date BETWEEN '2017-01-01' AND '2018-01-01')) AS purch
+LEFT JOIN books ON books.book_id = purch.book_id; 
+
 
 /*6. Show all books available for global sale*/
 SELECT book_id, title, author_name, original_price, disc_price
@@ -46,13 +51,14 @@ FROM (
 WHERE discount > 0;
 
 /*7. Check if a given book: bookTitle + bookAuthor is available in the inventory*/
-SELECT book_id, amount
+SELECT search_book.book_id, amount
 FROM (
 	SELECT book_id
 	FROM books
 	WHERE title = 'bookTitle' AND author_name = 'bookAuthor'
 ) AS search_book
-RIGHT JOIN inventory ON search_book.book_id = inventory.book_id;
+RIGHT JOIN inventory ON search_book.book_id = inventory.book_id
+WHERE search_book.book_id IS NOT NULL;
 
 /*8. List of all suppliers of a given book: bookTitle + bookAuthor*/
 SELECT *
