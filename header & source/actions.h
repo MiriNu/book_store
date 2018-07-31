@@ -1,7 +1,7 @@
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
-#include "db.h";
+#include "db.h"
 #include <string>
 
 //1. Show all available books in inventory

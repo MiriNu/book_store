@@ -14,9 +14,9 @@ int showBooks() {
 		cout << "There are no books in the inventory" << endl;
 	}
 	else {
-		cout << "Book ID\t|\tTitle\t|\tAuthor" << endl;
+		cout << "Book ID\tTitle\tAuthor\tAmount" << endl;
 		while (rset->next()) {
-			cout << rset->getUInt("book_id") << "\t|\t" << rset->getString("title") << "\t|\t" << rset->getString("author_name") << endl;
+			cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getString("author_name") << "\t" << rset->getString("amount") << endl;
 		}
 	}
 	delete pstmt;
@@ -40,25 +40,6 @@ int showOrders() {
 													 "	LEFT JOIN books ON books.book_id = stat_order.book_id "
 													 ") AS order_info "
 													 "WHERE(cust_id AND status_id != 5 AND status_id != 6) OR(cust_id IS NULL AND status_id != 3 AND status_id != 6);");
-	/*"SELECT order_id, order_date, cust_id, supp_id, book_id, title, amount, tot_price, stat_type "
-													 "FROM ( "
-													 "	SELECT * "
-													 "	FROM ( "
-													 "		SELECT * "
-													 "		FROM orders "
-													 "		LEFT JOIN order_status ON orders.status_id = order_status.status_id "
-													 "		UNION "
-													 "		SELECT * "
-													 "		FROM orders "
-													 "		RIGHT JOIN order_status ON orders.status_id = order_status.status_id "
-													 "	) AS stat_order "
-													 "	LEFT JOIN books ON books.book_id = stat_order.book_id "
-													 "	UNION "
-													 "	SELECT * "
-													 "	FROM stat_order "
-													 "	RIGHT JOIN books ON books.book_id = stat_order.book_id "
-													 ") "
-													 "WHERE	(cust_id != NULL AND status_id != 5 AND status_id != 6) OR (cust_id = NULL AND status_id != 3 AND status_id != 6);");*/
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
@@ -66,9 +47,9 @@ int showOrders() {
 	}
 	else {
 		cout << "Order ID\tOrder Date\tCustomer ID\tSupplier ID\tBook ID\tTitle\tAmount\tTotal Price\tStatus" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getUInt("order_id") << "\t" << rset->getString("order_date") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getUInt("supp_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getUInt("amount") << "\t" << rset->getDouble("tot_price") << "\t" << rset->getString("stat_type") << endl;
+		while (rset->next()) {
+			cout << rset->getUInt("order_id") << "\t" << rset->getString("order_date") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getUInt("supp_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getUInt("amount") << "\t" << rset->getDouble("tot_price") << "\t" << rset->getString("stat_type") << endl;
+		}
 	}
 	delete pstmt;
 	delete rset;
@@ -87,7 +68,7 @@ int showCustomers() {
 													 "	WHERE canceled = false "
 													 "	GROUP BY cust_id "
 													 ") AS cust_who_bought "
-													 "RIGHT JOIN customers ON customers.cust_id = cust_who_bought.cust_id;");
+													 "LEFT JOIN customers ON customers.cust_id = cust_who_bought.cust_id;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
@@ -95,9 +76,9 @@ int showCustomers() {
 	}
 	else {
 		cout << "Customer ID\tFirst name\tLast name\tPhone" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << "\t" << rset->getString("phone") << endl;
+		while (rset->next()) {
+			cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << "\t" << rset->getString("phone") << endl;
+		}
 	}
 	delete pstmt;
 	delete rset;
@@ -118,9 +99,9 @@ int showSuppliers() {
 	}
 	else {
 		cout << "Supplier ID\tSupplier name\tPhone\tBank account" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << endl;
+		while (rset->next()) {
+			cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << endl;
+		}
 	}
 	delete pstmt;
 	delete rset;
@@ -141,17 +122,17 @@ int showPurchases(string fromDate, string tilDate) {
 		cout << "There are no purchases in the given range of dates" << endl;
 	}
 	else {
-		cout << "Purchase ID\tBook ID\tSeller ID\tPurchase date\tCanceled\tOriginal price\tCustomer payment" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getUInt("purch_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getUInt("seller_id") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getString("purch_date") << "\t";
-		if (rset->getBoolean("canceled")) {
-			cout << "TRUE\t";
+		cout << "Purchase ID\tBook ID\tSeller ID\tCustomer ID\tPurchase date\tCanceled\tOriginal price\tCustomer payment" << endl;
+		while (rset->next()) {
+			cout << rset->getUInt("purch_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getUInt("seller_id") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getString("purch_date") << "\t";
+			if (rset->getBoolean("canceled")) {
+				cout << "TRUE\t";
+			}
+			else {
+				cout << "FALSE\t";
+			}
+			cout << rset->getDouble("origin_price") << "\t" << rset->getDouble("cust_pay") << endl;
 		}
-		else {
-			cout << "FALSE\t";
-		}
-		cout << rset->getUInt("origin_price") << "\t" << rset->getUInt("cust_pay") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -170,17 +151,6 @@ int showBooksOnSale() {
 													 "	LEFT JOIN books ON store_items.book_id = books.book_id "
 													 ") AS books_info "
 													 "WHERE discount > 0;");
-	/* "SELECT book_id, title, author_name, price AS original_price, (price * (100 - discount) / 100) AS disc_price "
-													 "FROM ( "
-													 "	SELECT * "
-													 "	FROM store_items "
-													 "	LEFT JOIN books ON store_items.book_id = books.book_id "
-													 "	UNION "
-													 "	SELECT * "
-													 "	FROM store_items "
-													 "	RIGHT JOIN books ON store_items.book_id = books.book_id "
-													 ") "
-													 "WHERE discount > 0;");*/
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
@@ -188,9 +158,9 @@ int showBooksOnSale() {
 	}
 	else {
 		cout << "Book ID\tTitle\tAuthor name\tOriginal price\tDiscount price" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getString("author_name") << "\t" << rset->getString("original_price") << "\t" << rset->getString("disc_price") << endl;
+		while (rset->next()) {
+			cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getString("author_name") << "\t" << rset->getDouble("original_price") << "\t" << rset->getDouble("disc_price") << endl;
+		}
 	}
 	delete pstmt;
 	delete rset;
@@ -202,23 +172,21 @@ int showBooksOnSale() {
 int searchBook(string bookTitle, string bookAuthor) {
 	Database &db = Database::getInstance();
 	Connection *con = db.getConnection();
-	PreparedStatement *pstmt = con->prepareStatement("SELECT book_id, amount "
+	PreparedStatement *pstmt = con->prepareStatement("SELECT inventory.book_id, title, author_name, amount "
 													 "FROM ( "
-													 "	SELECT book_id "
+													 "	SELECT book_id, title, author_name "
 													 "	FROM books "
 													 "	WHERE title = '" + bookTitle + "' AND author_name = '" + bookAuthor + "' "
 													 ") AS search_book "
-													 "RIGHT JOIN inventory ON search_book.book_id = inventory.book_id;");
+													 "LEFT JOIN inventory ON search_book.book_id = inventory.book_id;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
-		cout << "There is no book with matching title and author" << endl;
+		cout << "There is no book with matching title and author in the database, therefore the amount in the inventory is 0" << endl;
 	}
 	else {
-		cout << "Book ID\tAmount" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getUInt("book_id") << "\t" << rset->getUInt("amount") << endl;
+		rset->next();
+		cout << rset->getString("title") << " by " << rset->getString("author_name") << " has " << rset->getUInt("amount") << " copies in the inventory" << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -230,21 +198,21 @@ int searchBook(string bookTitle, string bookAuthor) {
 int showSuppliersOfBook(string bookTitle, string bookAuthor) {
 	Database &db = Database::getInstance();
 	Connection *con = db.getConnection();
-	PreparedStatement *pstmt = con->prepareStatement("SELECT * "
+	PreparedStatement *pstmt = con->prepareStatement("SELECT suppliers.supp_id, supp_name, phone, bank_acc, book_id, price "
 													 "FROM ( "
-													 "	SELECT * "
+													 "	SELECT book_prices.book_id, supp_id, price "
 													 "	FROM ( "
 													 "		SELECT book_id "
 													 "		FROM books "
 													 "		WHERE title = '" + bookTitle + "' AND author_name = '" + bookAuthor + "' "
 													 "	) AS search_book "
-													 "	RIGHT JOIN book_prices ON search_book.book_id = book_prices.book_id "
+													 "	LEFT JOIN book_prices ON search_book.book_id = book_prices.book_id "
 													 ") AS supplied_books "
-													 "RIGHT JOIN suppliers ON suppliers.supp_id = supplied_books.supp_id;");
+													 "LEFT JOIN suppliers ON suppliers.supp_id = supplied_books.supp_id;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
-		cout << "There are no customers who made a purchase" << endl;
+		cout << "There is no book with matching title and author in the database" << endl;
 	}
 	else {
 		cout << "Supplier ID\tSupplier name\tPhone\tBank account\tBook ID\tPrice" << endl;
@@ -262,25 +230,25 @@ int showSuppliersOfBook(string bookTitle, string bookAuthor) {
 int booksSold(string bookTitle, string bookAuthor, string fromDate) {
 	Database &db = Database::getInstance();
 	Connection *con = db.getConnection();
-	PreparedStatement *pstmt = con->prepareStatement("SELECT COUNT(*) AS books_sold "
+	PreparedStatement *pstmt = con->prepareStatement("SELECT COUNT(book_id) AS books_sold, title, author_name "
 													 "FROM ( "
-													 "	SELECT * "
+													 "	SELECT purch_id, purchases.book_id, title, author_name, purch_date, canceled "
 													 "	FROM ( "
-													 "		SELECT book_id "
+													 "		SELECT book_id, title, author_name "
 													 "		FROM books "
 													 "		WHERE title = '" + bookTitle + "' AND author_name = '" + bookAuthor + "' "
 													 "	) AS search_book "
-													 "	RIGHT JOIN purchases ON purchases.book_id = search_book.book_id "
+													 "	LEFT JOIN purchases ON purchases.book_id = search_book.book_id "
 													 "	WHERE purch_date >= '" + fromDate + "' AND canceled = false "
-													 ");");
+													 ") AS books_purch;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
-	if (rset->rowsCount() == 0) {
-		cout << "No such book as been sold" << endl;
+	rset->next();
+	if (rset->isNull("title") || rset->isNull("author_name")) {
+		cout << "No such book has been sold" << endl;
 	}
 	else {
-		rset->next();
-		cout << rset->getInt("books_sold") << " copies were sold" << endl;
+		cout << bookTitle << " by " << bookAuthor << " sold " << rset->getInt("books_sold") << " copies since " << fromDate << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -297,14 +265,14 @@ int booksPurchased(unsigned int custID, string fromDate) {
 													 "	SELECT * "
 													 "	FROM purchases "
 													 "	WHERE cust_id = '" + to_string(custID) + "' AND canceled = false AND purch_date >= '" + fromDate + "' "
-													 ");");
+													 ") AS cust_purch;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
-	if (rset->rowsCount() == 0) {
+	rset->next();
+	if (rset->getInt("tot_books") == 0) {
 		cout << "There are no purchases made by the customer" << endl;
 	}
 	else {
-		rset->next();
 		cout << "The customer made " << rset->getInt("tot_books") << " purchases, and bought " << rset->getInt("diff_books") << " different books" << endl;
 	}
 	delete pstmt;
@@ -319,18 +287,20 @@ int mostPurchasesCustomer(string fromDate) {
 	Connection *con = db.getConnection();
 	PreparedStatement *pstmt = con->prepareStatement("SELECT * "
 													 "FROM ( "
-													 "	SELECT cust_id, MAX(book_amount) max_book_amount "
+													 "	SELECT * "
 													 "	FROM ( "
 													 "		SELECT cust_id, COUNT(cust_id) book_amount "
 													 "		FROM ( "
 													 "			SELECT * "
 													 "			FROM purchases "
 													 "			WHERE canceled = false AND purch_date >= '" + fromDate + "' "
-													 "		) "
+													 "		) AS purch "
 													 "		GROUP BY cust_id "
 													 "	) AS custs_books "
+													 "	ORDER BY book_amount DESC "
+													 "	LIMIT 1 "
 													 ") AS top_cust "
-													 "RIGHT JOIN customers ON customers.cust_id = top_cust.cust_id;");
+													 "LEFT JOIN customers ON customers.cust_id = top_cust.cust_id;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
@@ -338,9 +308,9 @@ int mostPurchasesCustomer(string fromDate) {
 	}
 	else {
 		cout << "Customer ID\tFirst name\tLast name\tPhone\tAmount" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << "\t" << rset->getString("phone") << "\t" << rset->getUInt("max_book_amount") << endl;
+		while (rset->next()) {
+			cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << "\t" << rset->getString("phone") << "\t" << rset->getUInt("book_amount") << endl;
+		}
 	}
 	delete pstmt;
 	delete rset;
@@ -354,25 +324,27 @@ int mostOrdersSuplier(string fromDate) {
 	Connection *con = db.getConnection();
 	PreparedStatement *pstmt = con->prepareStatement("SELECT * "
 													 "FROM ( "
-													 "	SELECT supp_id, max(amount) "
+													 "	SELECT * "
 													 "	FROM ( "
 													 "		SELECT supp_id, SUM(amount) AS amount "
 													 "		FROM orders "
 													 "		WHERE order_date >= '" + fromDate + "' AND  status_id != 1 "
 													 "		GROUP BY supp_id "
 													 "	) AS supps_amounts "
+													 "	ORDER BY amount DESC "
+													 "	LIMIT 1 "
 													 ") AS max_supp "
-													 "RIGHT JOIN suppliers ON suppliers.supp_id = max_supp.supp_id;");
+													 "LEFT JOIN suppliers ON suppliers.supp_id = max_supp.supp_id;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
 		cout << "There are no orders from any supplier" << endl;
 	}
 	else {
-		cout << "Supplier ID\tSupplier name\tPhone\tBank account\tBook ID\tAmount" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << "\t" << rset->getUInt("book_id") << "\t" << rset->getDouble("amount") << endl;
+		cout << "Supplier ID\tSupplier name\tPhone\tBank account\tAmount" << endl;
+		while (rset->next()) {
+			cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << "\t" << rset->getUInt("amount") << endl;
+		}
 	}
 	delete pstmt;
 	delete rset;
@@ -389,14 +361,14 @@ int ordersMade(string fromDate, string tilDate) {
 													 "	SELECT * "
 													 "	FROM orders "
 													 "	WHERE (order_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') AND status_id != 1 "
-													 ");");
+													 ") AS orders_range;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
-	if (rset->rowsCount() == 0) {
+	rset->next();
+	if (rset->getInt("orders_amount") == 0) {
 		cout << "No orders were made" << endl;
 	}
 	else {
-		rset->next();
 		cout << rset->getInt("orders_amount") << " orders were made, and " << rset->getInt("books_amount_ordered") << " books were ordered" << endl;
 	}
 	delete pstmt;
@@ -414,14 +386,14 @@ int ordersMadePurchases(string fromDate, string tilDate) {
 													 "	SELECT * "
 													 "	FROM orders "
 													 "	WHERE (order_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') AND cust_id AND status_id = 5 "
-													 ");");
+													 ") AS orders_range;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
-	if (rset->rowsCount() == 0) {
+	rset->next();
+	if (rset->getInt("orders_amount") == 0) {
 		cout << "No orders were made by customers" << endl;
 	}
 	else {
-		rset->next();
 		cout << rset->getInt("orders_amount") << " orders were made, and " << rset->getInt("books_amount_ordered") << " books were ordered" << endl;
 	}
 	delete pstmt;
@@ -434,22 +406,22 @@ int ordersMadePurchases(string fromDate, string tilDate) {
 int totalDiscountCustomer(unsigned int custID, string fromDate) {
 	Database &db = Database::getInstance();
 	Connection *con = db.getConnection();
-	PreparedStatement *pstmt = con->prepareStatement("SELECT SUM(discount) AS total_disc"
+	PreparedStatement *pstmt = con->prepareStatement("SELECT SUM(discount) AS total_disc "
 													 "FROM ( "
 													 "	SELECT origin_price - cust_pay AS discount "
 													 "	FROM ( "
 													 "		SELECT * "
 													 "		FROM purchases "
 													 "		WHERE purch_date >= '" + fromDate + "' AND cust_id = '" + to_string(custID) + "' AND canceled = false "
-													 "	) "
-													 ");");
+													 "	) AS purch_disc "
+													 ") AS disc_sum;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
-	if (rset->rowsCount() == 0) {
-		cout << "The customer doesn't exist in the system" << endl;
+	rset->next();
+	if (rset->isNull("total_disc")) {
+		cout << "The customer didn't made any purchases since the date" << endl;
 	}
 	else {
-		rset->next();
 		cout << "The total discount the customer received is " << rset->getInt("total_disc") << endl;
 	}
 	delete pstmt;
@@ -462,34 +434,56 @@ int totalDiscountCustomer(unsigned int custID, string fromDate) {
 int sumRevenue(int y) {
 	Database &db = Database::getInstance();
 	Connection *con = db.getConnection();
-	PreparedStatement *pstmt = con->prepareStatement("SELECT cust_pay AS total_rev "
+	PreparedStatement *pstmt = con->prepareStatement("SELECT * "
 													 "FROM ( "
-													 "	SELECT SUM(cust_pay) "
-													 "	FROM purchases "
-													 "	WHERE(purch_date BETWEEN '" + to_string(y) + "-01-01' AND '" + to_string(y) + "-03-31') AND canceled = false "
-													 "	UNION "
-													 "	SELECT SUM(cust_pay) "
-													 "	FROM purchases "
-													 "	WHERE(purch_date BETWEEN '" + to_string(y) + "-04-01' AND '" + to_string(y) + "-06-30') AND canceled = false "
-													 "	UNION "
-													 "	SELECT SUM(cust_pay) "
-													 "	FROM purchases "
-													 "	WHERE(purch_date BETWEEN '" + to_string(y) + "-07-01' AND '" + to_string(y) + "-09-30') AND canceled = false "
-													 "	UNION "
-													 "	SELECT SUM(cust_pay) "
-													 "	FROM purchases "
-													 "	WHERE(purch_date BETWEEN '" + to_string(y) + "-10-01' AND '" + to_string(y) + "-12-31') AND canceled = false "
-													 ");");
+													 "	SELECT * "
+													 "	FROM ( "
+													 "		SELECT SUM(cust_pay) AS tot_Q1 "
+													 "		FROM purchases "
+													 "		WHERE (purch_date BETWEEN '" + to_string(y) + "-01-01' AND '" + to_string(y) + "-03-31') AND canceled = false "
+													 "	) AS Q1 "
+													 "	LEFT JOIN ( "
+													 "		SELECT * "
+													 "		FROM ( "
+													 "			SELECT SUM(cust_pay) AS tot_Q2 "
+													 "			FROM purchases "
+													 "			WHERE (purch_date BETWEEN '" + to_string(y) + "-04-01' AND '" + to_string(y) + "-06-30') AND canceled = false "
+													 "		) AS Q2 "
+													 "	) Q1Q2 ON(tot_Q1 OR tot_Q1 IS NULL) "
+													 "	LEFT JOIN ( "
+													 "		SELECT * "
+													 "		FROM ( "
+													 "			SELECT SUM(cust_pay) AS tot_Q3 "
+													 "			FROM purchases "
+													 "			WHERE (purch_date BETWEEN '" + to_string(y) + "-07-01' AND '" + to_string(y) + "-09-30') AND canceled = false"
+													 "		) AS Q3 "
+													 "	) Q1Q2Q3 ON(tot_Q1 OR tot_Q1 IS NULL) "
+													 "	LEFT JOIN ( "
+													 "		SELECT * "
+													 "		FROM ( "
+													 "			SELECT SUM(cust_pay) AS tot_Q4 "
+													 "			FROM purchases "
+													 "			WHERE (purch_date BETWEEN '" + to_string(y) + "-10-01' AND '" + to_string(y) + "-12-31') AND canceled = false "
+													 "		) AS Q4 "
+													 "	) Q1Q2Q3Q4 ON(tot_Q1 OR tot_Q1 IS NULL) "
+													 ") AS revenue;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
-	if (rset->rowsCount() == 0) {
+	rset->next();
+	if (rset->isNull("tot_Q1") && rset->isNull("tot_Q2") && rset->isNull("tot_Q3") && rset->isNull("tot_Q4")) {
 		cout << "The store didn't operate in that year" << endl;
 	}
 	else {
-		cout << "Revenue in Q1, Q2, Q3 and Q4" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getInt("total_rev") << endl;
+		cout << "the total revenue is:" << endl;
+		for (unsigned int i = 1; i <= 4; i++) {
+			cout << "Q" << i << ": ";
+			if (rset->isNull(i)) {
+				cout << "0" << endl;
+			}
+			else {
+				cout << rset->getUInt(i) << endl;
+			}
+		}
 	}
 	delete pstmt;
 	delete rset;
@@ -503,26 +497,27 @@ int customersAdded(string fromDate) {
 	Connection *con = db.getConnection();
 	PreparedStatement *pstmt = con->prepareStatement("SELECT COUNT(cust_id) AS new_custs "
 													 "FROM ( "
-													 "	SELECT cust_id "
+													 "	SELECT * "
 													 "	FROM ( "
 													 "		SELECT * "
 													 "		FROM ( "
-													 "			SELECT cust_id, MIN(purch_date) first_purch "
+													 "			SELECT cust_id, purch_date "
 													 "			FROM purchases "
 													 "			WHERE canceled = false "
-													 "		) "
-													 "		GROUP BY cust_id "
-													 "	) "
-													 "	WHERE first_purch >= '" + fromDate + "' "
-													 ") AS custs;");
+													 "		) AS cust_purch_date "
+													 "		ORDER BY purch_date ASC "
+													 "	) AS ordered_date "
+													 "	GROUP BY cust_id "
+													 ") AS count_cust "
+													 "WHERE purch_date >= '" + fromDate + "';");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
-	if (rset->rowsCount() == 0) {
+	rset->next();
+	if (rset->getUInt("new_custs") == 0) {
 		cout << "There are no new customers" << endl;
 	}
 	else {
-		rset->next();
-		cout << "The number of new customers is " << rset->getInt("new_custs") << endl;
+		cout << "The number of new customers since " + fromDate + " is " << rset->getInt("new_custs") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -538,15 +533,15 @@ int totalPaidSupplier(unsigned int suppID, string fromDate, string tilDate) {
 													 "FROM ( "
 													 "	SELECT * "
 													 "	FROM orders "
-													 "	WHERE supp_id = '" + to_string(suppID) + "' AND (order_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') "
-													 ");");
+													 "	WHERE supp_id = '" + to_string(suppID) + "' AND (order_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') AND status_id != 1 AND status_id != 6 "
+													 ") AS supp_orders;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
-	if (rset->rowsCount() == 0) {
+	rset->next();
+	if (rset->isNull("tot_shekels")) {
 		cout << "There were no orders from the supplier" << endl;
 	}
 	else {
-		rset->next();
 		cout << "The total amount paid to the supplier is " << rset->getInt("tot_shekels") << endl;
 	}
 	delete pstmt;
@@ -564,14 +559,14 @@ int totalSoldSeller(unsigned int sellID, string fromDate, string tilDate) {
 													 "	SELECT * "
 													 "	FROM purchases "
 													 "	WHERE seller_id = '" + to_string(sellID) + "' AND (purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') AND canceled = false "
-													 ");");
+													 ") AS seller_purch;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
-	if (rset->rowsCount() == 0) {
+	rset->next();
+	if (rset->isNull("tot_shekels")) {
 		cout << "There are no purchases with that seller" << endl;
 	}
 	else {
-		rset->next();
 		cout << "The total amount is " << rset->getInt("tot_shekels") << endl;
 	}
 	while (rset->next()) {
@@ -589,16 +584,16 @@ int top10Books(string fromDate, string tilDate) {
 	Connection *con = db.getConnection();
 	PreparedStatement *pstmt = con->prepareStatement("SELECT * "
 													 "FROM ( "
-													 "	SELECT * "
+													 "	SELECT books.book_id, title, author_name, amount "
 													 "	FROM ( "
 													 "		SELECT book_id, COUNT(*) AS amount "
 													 "		FROM purchases "
 													 "		WHERE purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "' "
 													 "		GROUP BY book_id "
-													 "	) "
-													 "	ORDER BY amount DESC "
+													 "	) AS count_amount "
+													 "	LEFT JOIN books ON books.book_id = count_amount.book_id "
 													 ") AS books_order "
-													 "Right JOIN books ON books.book_id = books_order.book_id "
+													 "ORDER BY amount DESC "
 													 "LIMIT 10;");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
