@@ -13,9 +13,8 @@
 
 NAMESPACES;
 int main(int argc, const char * argv[]) {
-	Database& db = Database::getInstance();
-	Connection *con = db.getConnection();
-	
 	showBooks();
+	cout << endl;
+	showOrders();
 	return 0;
 }

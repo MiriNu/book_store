@@ -14,10 +14,10 @@ int showBooks() {
 		cout << "There are no books in the inventory" << endl;
 	}
 	else {
-		cout << "Book ID/tTitle/tAuthor" << endl;
-	}
-	while (rset->next()) {
-		cout << rset->getUInt("book_id") << "/t" << rset->getString("title") << "/t" << rset->getString("book_author") << endl;
+		cout << "Book ID\t|\tTitle\t|\tAuthor" << endl;
+		while (rset->next()) {
+			cout << rset->getUInt("book_id") << "\t|\t" << rset->getString("title") << "\t|\t" << rset->getString("author_name") << endl;
+		}
 	}
 	delete pstmt;
 	delete rset;
@@ -47,17 +47,17 @@ int showOrders() {
 													 "	FROM stat_order "
 													 "	RIGHT JOIN books ON books.book_id = stat_order.book_id "
 													 ") "
-													 "WHERE	(cust_id != 0 AND status_id != 5 AND status_id != 6) OR (cust_id = 0 AND status_id != 3 AND status_id != 6);");
+													 "WHERE	(cust_id != NULL AND status_id != 5 AND status_id != 6) OR (cust_id = NULL AND status_id != 3 AND status_id != 6);");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
 	if (rset->rowsCount() == 0) {
 		cout << "There are no open orders" << endl;
 	}
 	else {
-		cout << "Order ID/tOrder Date/tCustomer ID/tSupplier ID/tBook ID/tTitle/tAmount/tTotal Price/tStatus" << endl;
+		cout << "Order ID\tOrder Date\tCustomer ID\tSupplier ID\tBook ID\tTitle\tAmount\tTotal Price\tStatus" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("order_id") << "/t" << rset->getString("order_date") << "/t" << rset->getUInt("cust_id") << "/t" << rset->getUInt("supp_id") << "/t" << rset->getUInt("book_id") << "/t" << rset->getString("title") << "/t" << rset->getUInt("amount") << "/t" << rset->getDouble("tot_price") << "/t" << rset->getString("stat_type") << endl;
+		cout << rset->getUInt("order_id") << "\t" << rset->getString("order_date") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getUInt("supp_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getUInt("amount") << "\t" << rset->getDouble("tot_price") << "\t" << rset->getString("stat_type") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -83,10 +83,10 @@ int showCustomers() {
 		cout << "There are no customers who made a purchase" << endl;
 	}
 	else {
-		cout << "Customer ID/tFirst name/tLast name/tPhone" << endl;
+		cout << "Customer ID\tFirst name\tLast name\tPhone" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("cust_id") << "/t" << rset->getString("first_name") << "/t" << rset->getString("last_name") << "/t" << rset->getString("phone") << endl;
+		cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << "\t" << rset->getString("phone") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -106,10 +106,10 @@ int showSuppliers() {
 		cout << "There are no suppliers" << endl;
 	}
 	else {
-		cout << "Supplier ID/tSupplier name/tPhone/tBank account" << endl;
+		cout << "Supplier ID\tSupplier name\tPhone\tBank account" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("supp_id") << "/t" << rset->getString("supp_name") << "/t" << rset->getString("phone") << "/t" << rset->getString("bank_acc") << endl;
+		cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -130,17 +130,17 @@ int showPurchases(string fromDate, string tilDate) {
 		cout << "There are no purchases in the given range of dates" << endl;
 	}
 	else {
-		cout << "Purchase ID/tBook ID/tSeller ID/tPurchase date/tCanceled/tOriginal price/tCustomer payment" << endl;
+		cout << "Purchase ID\tBook ID\tSeller ID\tPurchase date\tCanceled\tOriginal price\tCustomer payment" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("purch_id") << "/t" << rset->getUInt("book_id") << "/t" << rset->getUInt("seller_id") << "/t" << rset->getUInt("cust_id") << "/t" << rset->getString("purch_date") << "/t";
+		cout << rset->getUInt("purch_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getUInt("seller_id") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getString("purch_date") << "\t";
 		if (rset->getBoolean("canceled")) {
-			cout << "TRUE/t";
+			cout << "TRUE\t";
 		}
 		else {
-			cout << "FALSE/t";
+			cout << "FALSE\t";
 		}
-		cout << rset->getUInt("origin_price") << "/t" << rset->getUInt("cust_pay") << endl;
+		cout << rset->getUInt("origin_price") << "\t" << rset->getUInt("cust_pay") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -169,10 +169,10 @@ int showBooksOnSale() {
 		cout << "There are no books on sale" << endl;
 	}
 	else {
-		cout << "Book ID/tTitle/tAuthor name/tOriginal price/tDiscount price" << endl;
+		cout << "Book ID\tTitle\tAuthor name\tOriginal price\tDiscount price" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("book_id") << "/t" << rset->getString("title") << "/t" << rset->getString("author_name") << "/t" << rset->getString("original_price") << "/t" << rset->getString("disc_price") << endl;
+		cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getString("author_name") << "\t" << rset->getString("original_price") << "\t" << rset->getString("disc_price") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -197,10 +197,10 @@ int searchBook(string bookTitle, string bookAuthor) {
 		cout << "There is no book with matching title and author" << endl;
 	}
 	else {
-		cout << "Book ID/tAmount" << endl;
+		cout << "Book ID\tAmount" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("book_id") << "/t" << rset->getUInt("amount") << endl;
+		cout << rset->getUInt("book_id") << "\t" << rset->getUInt("amount") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -229,10 +229,10 @@ int showSuppliersOfBook(string bookTitle, string bookAuthor) {
 		cout << "There are no customers who made a purchase" << endl;
 	}
 	else {
-		cout << "Supplier ID/tSupplier name/tPhone/tBank account/tBook ID/tPrice" << endl;
+		cout << "Supplier ID\tSupplier name\tPhone\tBank account\tBook ID\tPrice" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("supp_id") << "/t" << rset->getString("supp_name") << "/t" << rset->getString("phone") << "/t" << rset->getString("bank_acc") << "/t" << rset->getUInt("book_id") << "/t" << rset->getDouble("price") << endl;
+		cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << "\t" << rset->getUInt("book_id") << "\t" << rset->getDouble("price") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -319,10 +319,10 @@ int mostPurchasesCustomer(string fromDate) {
 		cout << "There are no customers who made a purchase" << endl;
 	}
 	else {
-		cout << "Customer ID/tFirst name/tLast name/tPhone/tAmount" << endl;
+		cout << "Customer ID\tFirst name\tLast name\tPhone\tAmount" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("cust_id") << "/t" << rset->getString("first_name") << "/t" << rset->getString("last_name") << "/t" << rset->getString("phone") << "/t" << rset->getUInt("max_book_amount") << endl;
+		cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << "\t" << rset->getString("phone") << "\t" << rset->getUInt("max_book_amount") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -351,10 +351,10 @@ int mostOrdersSuplier(string fromDate) {
 		cout << "There are no orders from any supplier" << endl;
 	}
 	else {
-		cout << "Supplier ID/tSupplier name/tPhone/tBank account/tBook ID/tAmount" << endl;
+		cout << "Supplier ID\tSupplier name\tPhone\tBank account\tBook ID\tAmount" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("supp_id") << "/t" << rset->getString("supp_name") << "/t" << rset->getString("phone") << "/t" << rset->getString("bank_acc") << "/t" << rset->getUInt("book_id") << "/t" << rset->getDouble("amount") << endl;
+		cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << "\t" << rset->getUInt("book_id") << "\t" << rset->getDouble("amount") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -395,7 +395,7 @@ int ordersMadePurchases(string fromDate, string tilDate) {
 													 "FROM ( "
 													 "	SELECT * "
 													 "	FROM orders "
-													 "	WHERE (order_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') AND cust_id != 0 AND status_id = 5 "
+													 "	WHERE (order_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') AND cust_id != NULL AND status_id = 5 "
 													 ");");
 	ResultSet *rset = pstmt->executeQuery();
 	rset->beforeFirst();
@@ -557,7 +557,7 @@ int totalSoldSeller(unsigned int sellID, string fromDate, string tilDate) {
 		cout << "The total amount is " << rset->getInt("tot_shekels") << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("cust_id") << "/t" << rset->getString("first_name") << "/t" << rset->getString("last_name") << rset->getString("phone") << endl;
+		cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << rset->getString("phone") << endl;
 	}
 	delete pstmt;
 	delete rset;
@@ -588,10 +588,10 @@ int top10Books(string fromDate, string tilDate) {
 		cout << "There were no purchase in that time" << endl;
 	}
 	else {
-		cout << "Book ID/tTitle/tAuthor name/tAmount" << endl;
+		cout << "Book ID\tTitle\tAuthor name\tAmount" << endl;
 	}
 	while (rset->next()) {
-		cout << rset->getUInt("book_id") << "/t" << rset->getString("title") << "/t" << rset->getString("author_name") << "/t" << rset->getString("amount") << endl;
+		cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getString("author_name") << "\t" << rset->getString("amount") << endl;
 	}
 	delete pstmt;
 	delete rset;
