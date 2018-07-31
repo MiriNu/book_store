@@ -43,7 +43,7 @@ int main(int argc, const char * argv[]) {
 	cout << endl;
 	totalDiscountCustomer(10, "2016-01-01");
 	cout << endl;
-	sumRevenue(2017);
+	sumRevenue("2017");
 	cout << endl;
 	customersAdded("2016-01-01");
 	cout << endl;
