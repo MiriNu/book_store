@@ -15,7 +15,7 @@
 
 NAMESPACES;
 
-void printMenue() {
+void printMenu() {
 	cout << endl;
 	cout << "Enter the number of the action you wish to take" << endl;
 	cout << "1. Show all available books in inventory" << endl;
@@ -49,12 +49,12 @@ void waitToContinue() {
 }
 
 int main(int argc, const char * argv[]) {
-	string fromD, tilD, title, author;
+	string fromD = "a", tilD = "a", title = "a", author = "a";
 	unsigned int id;
 	int num;
 
 	while (1) {
-		printMenue();
+		printMenu();
 		cin >> num;
 		switch (num) {
 		case 1:
@@ -76,9 +76,9 @@ int main(int argc, const char * argv[]) {
 		case 5:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			cout << "Enter the end date in the format yyyy-mm-tt" << endl;
-			cin >> tilD;
+			getline(cin, tilD);
 			showPurchases(fromD, tilD);
 			break;
 		case 6:
@@ -88,115 +88,118 @@ int main(int argc, const char * argv[]) {
 		case 7:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the book's title" << endl;
-			cin >> title;
+			getline(cin, title);
 			cout << "Enter the book's author" << endl;
-			cin >> author;
+			getline(cin, author);
 			searchBook(title, author);
 			break;
 		case 8:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the book's title" << endl;
-			cin >> title;
+			getline(cin, title);
 			cout << "Enter the book's author" << endl;
-			cin >> author;
+			getline(cin, author);
 			showSuppliersOfBook(title, author);
 			break;
 		case 9:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the book's title" << endl;
-			cin >> title;
+			getline(cin, title);
 			cout << "Enter the book's author" << endl;
-			cin >> author;
+			getline(cin, author);
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			booksSold(title, author, fromD);
 			break;
 		case 10:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the customers's ID" << endl;
 			cin >> id;
+			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			booksPurchased(id, fromD);
 			break;
 		case 11:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			mostPurchasesCustomer(fromD);
 			break;
 		case 12:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			mostOrdersSuplier(fromD);
 			break;
 		case 13:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			cout << "Enter the end date in the format yyyy-mm-tt" << endl;
-			cin >> tilD;
+			getline(cin, tilD);
 			ordersMade(fromD, tilD);
 			break;
 		case 14:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			cout << "Enter the end date in the format yyyy-mm-tt" << endl;
-			cin >> tilD;
+			getline(cin, tilD);
 			ordersMadePurchases(fromD, tilD);
 			break;
 		case 15:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the customers's ID" << endl;
 			cin >> id;
+			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			totalDiscountCustomer(id, fromD);
 			break;
 		case 16:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
-			cout << "Enter the year in the format yyyy";
-			cin >> fromD;
+			cout << "Enter the year in the format yyyy" << endl;
+			getline(cin, fromD);
 			sumRevenue(fromD);
 			break;
 		case 17:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			customersAdded(fromD);
 			break;
 		case 18:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the supplier's ID" << endl;
 			cin >> id;
+			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			cout << "Enter the end date in the format yyyy-mm-tt" << endl;
-			cin >> tilD;
+			getline(cin, tilD);
 			totalPaidSupplier(id, fromD, tilD);
 			break;
 		case 19:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the seller's ID" << endl;
 			cin >> id;
+			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			cout << "Enter the end date in the format yyyy-mm-tt" << endl;
-			cin >> tilD;
+			getline(cin, tilD);
 			totalSoldSeller(id, fromD, tilD);
 			break;
 		case 20:
 			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << "Enter the start date in the format yyyy-mm-tt" << endl;
-			cin >> fromD;
+			getline(cin, fromD);
 			cout << "Enter the end date in the format yyyy-mm-tt" << endl;
-			cin >> tilD;
+			getline(cin, tilD);
 			top10Books(fromD, tilD);
 			break;
 		case 99:
-			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 			cout << endl << "Bye" << endl;
 			return 0;
 			break;
