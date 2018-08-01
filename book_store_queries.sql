@@ -228,7 +228,7 @@ FROM (
 	FROM (
 		SELECT book_id, COUNT(*) AS amount
 		FROM purchases
-		WHERE purch_date BETWEEN 'fromDate' AND 'tilDate'
+		WHERE (purch_date BETWEEN 'fromDate' AND 'tilDate') AND canceled = false
 		GROUP BY book_id
 	) AS count_amount
     LEFT JOIN books ON books.book_id = count_amount.book_id

@@ -31,9 +31,9 @@ int showBooks() {
 			cout << "There are no books in the inventory" << endl;
 		}
 		else {
-			cout << "Book ID\tTitle\tAuthor\tAmount" << endl;
+			cout << "Book ID\tTitle\t\t\tAuthor\t\tAmount" << endl;
 			while (rset->next()) {
-				cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getString("author_name") << "\t" << rset->getString("amount") << endl;
+				cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t\t\t" << rset->getString("author_name") << "\t\t" << rset->getString("amount") << endl;
 			}
 		}
 		delete pstmt;
@@ -311,7 +311,7 @@ int booksSold(string bookTitle, string bookAuthor, string fromDate) {
 			cout << "No such book has been sold" << endl;
 		}
 		else {
-			cout << bookTitle << " by " << bookAuthor << " sold " << rset->getInt("books_sold") << " copies since " << fromDate << endl;
+			cout << rset->getString("title") << " by " << rset->getString("author_name") << " sold " << rset->getInt("books_sold") << " copies since " << fromDate << endl;
 		}
 		delete pstmt;
 		delete rset;
@@ -756,7 +756,7 @@ int top10Books(string fromDate, string tilDate) {
 														 "	FROM ( "
 														 "		SELECT book_id, COUNT(*) AS amount "
 														 "		FROM purchases "
-														 "		WHERE purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "' "
+														 "		WHERE (purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') AND canceled = false "
 														 "		GROUP BY book_id "
 														 "	) AS count_amount "
 														 "	LEFT JOIN books ON books.book_id = count_amount.book_id "
