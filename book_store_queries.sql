@@ -104,7 +104,7 @@ FROM (
 ) AS cust_purch;
 
 /*11. Show the customer details who bought the most since given date fromDate*/
-SELECT *
+SELECT top_cust.cust_id, book_amount, first_name, last_name, phone
 FROM (
 	SELECT *
 	FROM (
@@ -122,7 +122,7 @@ FROM (
 LEFT JOIN customers ON customers.cust_id = top_cust.cust_id;
 
 /*12. show the supplier details who sold us the most books since given date fromDate*/
-SELECT *
+SELECT amount, max_supp.supp_id, supp_name, phone, bank_acc 
 FROM (
 	SELECT *
 	FROM (
@@ -145,6 +145,7 @@ FROM (
 ) AS orders_range;
 
 /*14. amount of orders made (and how many books?) between given dates: fromDate & tilDate that were made by customers sold*/
+/*im not sure it does what it has to do, need to check the file*/
 SELECT COUNT(order_id) orders_amount, SUM(amount) books_amount_ordered
 FROM (
 	SELECT *
