@@ -33,14 +33,23 @@ FROM suppliers;
 
 /*5. Show all purchases between given dates: fromDate & tilDate*/
 /*instead of book id, show name. add customer name, replace 0 1 with yes no*/
-SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, canceled, cust_pay
-FROM (
-	SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0 , 'No', 'Yes') AS canceled, origin_price, cust_pay
-	FROM purchases
-	WHERE (purch_date BETWEEN 'fromDate' AND 'tilDate')
-) AS purch
-LEFT JOIN books ON books.book_id = purch.book_id; 
-
+SELECT purch_id, book_id, title, seller_id, seller_name, customers.cust_id, customers.first_name, purch_date, canceled, cust_pay
+FROM (	
+		SELECT purch_id, book_id, title, sellers.seller_id, sellers.first_name seller_name, cust_id, purch_date, canceled, cust_pay
+		FROM (
+			SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, canceled, cust_pay
+			FROM (
+				SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0 , 'No', 'Yes') AS canceled, origin_price, cust_pay
+				FROM purchases
+				WHERE (purch_date BETWEEN 'fromDate' AND 'tilDate')
+			) AS purch
+			LEFT JOIN books ON books.book_id = purch.book_id
+		) AS answer
+		LEFT JOIN sellers ON answer.seller_id = sellers.seller_id
+    ) AS ans_with_sellername
+LEFT JOIN customers ON customers.cust_id =ans_with_sellername.cust_id
+ORDER BY purch_id;    
+    
 /*6. Show all books available for global sale*/
 SELECT book_id, title, author_name, original_price, disc_price
 FROM (
@@ -60,6 +69,7 @@ FROM (
 LEFT JOIN inventory ON search_book.book_id = inventory.book_id;
 
 /*8. List of all suppliers of a given book: bookTitle + bookAuthor*/
+/*must be fixed*/
 SELECT suppliers.supp_id, supp_name, phone, bank_acc, book_id, price
 FROM (
 	SELECT book_prices.book_id, supp_id, price
