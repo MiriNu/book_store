@@ -3,9 +3,13 @@
 
 #include "db.h"
 #include <string>
+#include <iomanip>
 
-//checks if the format of a string is yyyy-mm-tt, returns 0 if so and 1 otherwise
+//checks if the format of a string is yyyy-mm-tt, returns true if so and false otherwise
 bool validateDateFormat(string date);
+
+//checks the width of every item in the table and selects the width required for each column
+void widths(ResultSet* rs, int* arr, int cul);
 
 //1. Show all available books in inventory
 int showBooks();

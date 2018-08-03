@@ -5,17 +5,22 @@ LEFT JOIN inventory ON books.book_id = inventory.book_id
 WHERE inventory.amount > 0;
 
 /*2. Show all open orders*/
-SELECT order_id, order_date, cust_id, supp_id, book_id, title, amount, tot_price, stat_type
+SELECT order_id, order_date, cust_id, first_name, suppliers.supp_id, supp_name, book_id, title, amount, tot_price, stat_type
 FROM (
-	SELECT order_id, order_date, cust_id, supp_id, books.book_id, title, amount, tot_price, stat_type, stat_order.status_id
-    FROM (
-		SELECT order_id, order_date, cust_id, supp_id, book_id, amount, tot_price, stat_type, orders.status_id
-        FROM orders
-        LEFT JOIN order_status ON orders.status_id = order_status.status_id
-	) AS stat_order
-    LEFT JOIN books ON books.book_id = stat_order.book_id
-) AS order_info
-WHERE (cust_id AND status_id != 5 AND status_id != 6) OR (cust_id IS NULL AND status_id != 3 AND status_id != 6);
+	SELECT order_id, order_date, customers.cust_id, first_name, supp_id, book_id, title, amount, tot_price, stat_type
+	FROM (
+		SELECT order_id, order_date, cust_id, supp_id, books.book_id, title, amount, tot_price, stat_type, stat_order.status_id
+		FROM (
+			SELECT order_id, order_date, cust_id, supp_id, book_id, amount, tot_price, stat_type, orders.status_id
+			FROM orders
+			LEFT JOIN order_status ON orders.status_id = order_status.status_id
+			WHERE (cust_id AND orders.status_id != 5 AND orders.status_id != 6) OR (cust_id IS NULL AND orders.status_id != 3 AND orders.status_id != 6)
+		) AS stat_order
+		LEFT JOIN books ON books.book_id = stat_order.book_id
+	) AS book_info
+    LEFT JOIN customers ON book_info.cust_id = customers.cust_id
+) AS cust_info
+LEFT JOIN suppliers ON cust_info.supp_id = suppliers.supp_id;
 
 /*3. List of all customers who made a purchase*/
 SELECT customers.cust_id, first_name, last_name, phone
@@ -32,7 +37,6 @@ SELECT *
 FROM suppliers;
 
 /*5. Show all purchases between given dates: fromDate & tilDate*/
-/*instead of book id, show name. add customer name, replace 0 1 with yes no*/
 SELECT purch_id, book_id, title, seller_id, seller_name, customers.cust_id, customers.first_name, purch_date, canceled, cust_pay
 FROM (	
 		SELECT purch_id, book_id, title, sellers.seller_id, sellers.first_name seller_name, cust_id, purch_date, canceled, cust_pay
@@ -69,7 +73,6 @@ FROM (
 LEFT JOIN inventory ON search_book.book_id = inventory.book_id;
 
 /*8. List of all suppliers of a given book: bookTitle + bookAuthor*/
-/*must be fixed*/
 SELECT suppliers.supp_id, supp_name, phone, bank_acc, book_id, price
 FROM (
 	SELECT book_prices.book_id, supp_id, price
@@ -95,7 +98,7 @@ FROM (
 	WHERE purch_date >= 'fromDate' AND canceled = false
 ) AS books_purch;
 
-/*10. How many books (different books too?) were purchased by customer: custID since given date fromDate*/
+/*10. How many books and different book types were purchased by customer: custID since given date fromDate*/
 SELECT COUNT(book_id) AS tot_books, COUNT(DISTINCT book_id) AS diff_books
 FROM (
 	SELECT *
@@ -136,7 +139,7 @@ FROM (
 ) AS max_supp
 LEFT JOIN suppliers ON suppliers.supp_id = max_supp.supp_id;
 
-/*13. amount of orders made (and how many books?) between given dates: fromDate & tilDate*/
+/*13. amount of orders made and how many books between given dates: fromDate & tilDate*/
 SELECT COUNT(order_id) orders_amount, SUM(amount) books_amount_ordered
 FROM (
 	SELECT *
@@ -144,8 +147,7 @@ FROM (
 	WHERE (order_date BETWEEN 'fromDate' AND 'tilDate') AND status_id != 1
 ) AS orders_range;
 
-/*14. amount of orders made (and how many books?) between given dates: fromDate & tilDate that were made by customers sold*/
-/*im not sure it does what it has to do, need to check the file*/
+/*14. amount of orders made and how many books between given dates: fromDate & tilDate that were made by customers sold*/
 SELECT COUNT(order_id) orders_amount, SUM(amount) books_amount_ordered
 FROM (
 	SELECT *
