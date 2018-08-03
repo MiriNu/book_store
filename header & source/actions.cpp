@@ -16,6 +16,17 @@ bool validateDateFormat(string date) {
 	return true;
 }
 
+//checks the width of every item in the table and selects the width required for each column
+void widths(ResultSet* rs, int* arr, int cul) {
+	while (rs->next()) {
+		for (int i = 1; i <= cul; i++) {
+			if (arr[i - 1] < (rs->getString(i)).length() + 3) {
+				arr[i - 1] = (rs->getString(i)).length() + 3;
+			}
+		}
+	}
+}
+
 //1. Show all available books in inventory
 int showBooks() {
 	Database &db = Database::getInstance();
@@ -26,14 +37,26 @@ int showBooks() {
 														 "LEFT JOIN inventory ON books.book_id = inventory.book_id "
 														 "WHERE inventory.amount > 0;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[4] = { 10, 8, 9, 9 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 4);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There are no books in the inventory" << endl;
+			cout << endl << "There are no books in the inventory" << endl;
 		}
 		else {
-			cout << "Book ID\tTitle\t\t\tAuthor\t\tAmount" << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Book ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "Title";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Author";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Amount";
+			cout << endl;
 			while (rset->next()) {
-				cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t\t\t" << rset->getString("author_name") << "\t\t" << rset->getString("amount") << endl;
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("book_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getString("title");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getString("author_name");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getString("amount");
+				cout << endl;
 			}
 		}
 		delete pstmt;
@@ -51,26 +74,57 @@ int showOrders() {
 	Database &db = Database::getInstance();
 	try {
 		Connection *con = db.getConnection();
-		PreparedStatement *pstmt = con->prepareStatement("SELECT order_id, order_date, cust_id, supp_id, book_id, title, amount, tot_price, stat_type "
+		PreparedStatement *pstmt = con->prepareStatement("SELECT order_id, order_date, cust_id, first_name, suppliers.supp_id, supp_name, book_id, title, amount, tot_price, stat_type "
 														 "FROM ( "
-														 "	SELECT order_id, order_date, cust_id, supp_id, books.book_id, title, amount, tot_price, stat_type, stat_order.status_id "
+														 "	SELECT order_id, order_date, customers.cust_id, first_name, supp_id, book_id, title, amount, tot_price, stat_type "
 														 "	FROM ( "
-														 "		SELECT order_id, order_date, cust_id, supp_id, book_id, amount, tot_price, stat_type, orders.status_id "
-														 "		FROM orders "
-														 "		LEFT JOIN order_status ON orders.status_id = order_status.status_id "
-														 "	) AS stat_order "
-														 "	LEFT JOIN books ON books.book_id = stat_order.book_id "
-														 ") AS order_info "
-														 "WHERE(cust_id AND status_id != 5 AND status_id != 6) OR(cust_id IS NULL AND status_id != 3 AND status_id != 6);");
+														 "		SELECT order_id, order_date, cust_id, supp_id, books.book_id, title, amount, tot_price, stat_type, stat_order.status_id "
+														 "		FROM ( "
+														 "			SELECT order_id, order_date, cust_id, supp_id, book_id, amount, tot_price, stat_type, orders.status_id "
+														 "			FROM orders "
+														 "			LEFT JOIN order_status ON orders.status_id = order_status.status_id "
+														 "			WHERE (cust_id AND orders.status_id != 5 AND orders.status_id != 6) OR (cust_id IS NULL AND orders.status_id != 3 AND orders.status_id != 6) "
+														 "		) AS stat_order "
+														 "		LEFT JOIN books ON books.book_id = stat_order.book_id "
+														 "	) AS book_info "
+														 "	LEFT JOIN customers ON book_info.cust_id = customers.cust_id "
+														 ") AS cust_info "
+														 "LEFT JOIN suppliers ON cust_info.supp_id = suppliers.supp_id;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[11] = { 11, 13, 14, 16, 14, 16, 10, 8, 9, 14, 9 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 11);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There are no open orders" << endl;
+			cout << endl << "There are no open orders" << endl;
 		}
 		else {
-			cout << "Order ID\tOrder Date\tCustomer ID\tSupplier ID\tBook ID\tTitle\tAmount\tTotal Price\tStatus" << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Order ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "Order date";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Customer ID";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Customer name";
+			cout << left << setw(widthArr[4]) << setfill(' ') << "Supplier ID";
+			cout << left << setw(widthArr[5]) << setfill(' ') << "Supplier name";
+			cout << left << setw(widthArr[6]) << setfill(' ') << "Book ID";
+			cout << left << setw(widthArr[7]) << setfill(' ') << "Title";
+			cout << left << setw(widthArr[8]) << setfill(' ') << "Amount";
+			cout << left << setw(widthArr[9]) << setfill(' ') << "Total Price";
+			cout << left << setw(widthArr[10]) << setfill(' ') << "Status";
+			cout << endl;
 			while (rset->next()) {
-				cout << rset->getUInt("order_id") << "\t" << rset->getString("order_date") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getUInt("supp_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getUInt("amount") << "\t" << rset->getDouble("tot_price") << "\t" << rset->getString("stat_type") << endl;
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("order_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getString("order_date");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getUInt("cust_id");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getString("first_name");
+				cout << left << setw(widthArr[4]) << setfill(' ') << rset->getUInt("supp_id");
+				cout << left << setw(widthArr[5]) << setfill(' ') << rset->getString("supp_name");
+				cout << left << setw(widthArr[6]) << setfill(' ') << rset->getUInt("book_id");
+				cout << left << setw(widthArr[7]) << setfill(' ') << rset->getString("title");
+				cout << left << setw(widthArr[8]) << setfill(' ') << rset->getUInt("amount");
+				cout << left << setw(widthArr[9]) << setfill(' ') << rset->getDouble("tot_price");
+				cout << left << setw(widthArr[10]) << setfill(' ') << rset->getString("stat_type");
+				cout << endl;
 			}
 		}
 		delete pstmt;
@@ -97,14 +151,26 @@ int showCustomers() {
 														 ") AS cust_who_bought "
 														 "LEFT JOIN customers ON customers.cust_id = cust_who_bought.cust_id;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[4] = { 14, 13, 12, 8 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 4);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There are no customers who made a purchase" << endl;
+			cout << endl << "There are no customers who made a purchase" << endl;
 		}
 		else {
-			cout << "Customer ID\tFirst name\tLast name\tPhone" << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Customer ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "First name";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Last name";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Phone";
+			cout << endl;
 			while (rset->next()) {
-				cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << "\t" << rset->getString("phone") << endl;
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("cust_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getString("first_name");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getString("last_name");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getString("phone");
+				cout << endl;
 			}
 		}
 		delete pstmt;
@@ -125,14 +191,26 @@ int showSuppliers() {
 		PreparedStatement *pstmt = con->prepareStatement("SELECT * "
 														 "FROM suppliers;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[4] = { 14, 16, 8, 15 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 4);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There are no suppliers" << endl;
+			cout << endl << "There are no suppliers" << endl;
 		}
 		else {
-			cout << "Supplier ID\tSupplier name\tPhone\tBank account" << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Supplier ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "Supplier name";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Phone";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Bank account";
+			cout << endl;
 			while (rset->next()) {
-				cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << endl;
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("supp_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getString("supp_name");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getString("phone");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getString("bank_acc");
+				cout << endl;
 			}
 		}
 		delete pstmt;
@@ -154,23 +232,55 @@ int showPurchases(string fromDate, string tilDate) {
 	}
 	try {
 		Connection *con = db.getConnection();
-		PreparedStatement *pstmt = con->prepareStatement("SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, canceled, cust_pay "
-														 "FROM ( "
-														 "	SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0, 'No', 'Yes') AS canceled, origin_price, cust_pay "
-														 "	FROM purchases "
-														 "	WHERE (purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') "
-														 ") AS purch "
-														 "LEFT JOIN books ON books.book_id = purch.book_id;");
-
+		PreparedStatement *pstmt = con->prepareStatement("SELECT purch_id, book_id, title, seller_id, seller_name, customers.cust_id, customers.first_name, purch_date, canceled, cust_pay "
+														 "	FROM ( "
+														 "		SELECT purch_id, book_id, title, sellers.seller_id, sellers.first_name seller_name, cust_id, purch_date, canceled, cust_pay "
+														 "		FROM ( "
+														 "			SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, canceled, cust_pay "
+														 "			FROM ( "
+														 "				SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0, 'No', 'Yes') AS canceled, origin_price, cust_pay "
+														 "				FROM purchases "
+														 "				WHERE (purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') "
+														 "			) AS purch "
+														 "			LEFT JOIN books ON books.book_id = purch.book_id "
+														 "		) AS answer "
+														 "		LEFT JOIN sellers ON answer.seller_id = sellers.seller_id "
+														 "	) AS ans_with_sellername "
+														 "	LEFT JOIN customers ON customers.cust_id = ans_with_sellername.cust_id "
+														 "	ORDER BY purch_id;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[10] = { 14, 10, 8, 12, 14, 14, 16, 16, 11, 10 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 10);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There are no purchases in the given range of dates" << endl;
+			cout << endl << "There are no purchases in the given range of dates" << endl;
 		}
 		else {
-			cout << "Purchase ID\tBook ID\tTitle\tSeller ID\tCustomer ID\tPurchase date\tCanceled\tPayment" << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Purchase ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "Book ID";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Title";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Seller ID";
+			cout << left << setw(widthArr[4]) << setfill(' ') << "Seller name";
+			cout << left << setw(widthArr[5]) << setfill(' ') << "Customer ID";
+			cout << left << setw(widthArr[6]) << setfill(' ') << "Customer name";
+			cout << left << setw(widthArr[7]) << setfill(' ') << "Purchase date";
+			cout << left << setw(widthArr[8]) << setfill(' ') << "Canceled";
+			cout << left << setw(widthArr[9]) << setfill(' ') << "Payment";
+			cout << endl;
 			while (rset->next()) {
-				cout << rset->getUInt("purch_id") << "\t" << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getUInt("seller_id") << "\t" << rset->getUInt("cust_id") << "\t" << rset->getString("purch_date") << "\t" << rset->getString("canceled") << "\t" << rset->getDouble("cust_pay") << endl;
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("purch_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getUInt("book_id");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getString("title");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getUInt("seller_id");
+				cout << left << setw(widthArr[4]) << setfill(' ') << rset->getString("seller_name");
+				cout << left << setw(widthArr[5]) << setfill(' ') << rset->getUInt("cust_id");
+				cout << left << setw(widthArr[6]) << setfill(' ') << rset->getString("first_name");
+				cout << left << setw(widthArr[7]) << setfill(' ') << rset->getString("purch_date");
+				cout << left << setw(widthArr[8]) << setfill(' ') << rset->getString("canceled");
+				cout << left << setw(widthArr[9]) << setfill(' ') << rset->getDouble("cust_pay");
+				cout << endl;
 			}
 		}
 		delete pstmt;
@@ -196,14 +306,28 @@ int showBooksOnSale() {
 														 ") AS books_info "
 														 "WHERE discount > 0;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[5] = { 9, 8, 14, 17, 17 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 5);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There are no books on sale" << endl;
+			cout << endl << "There are no books on sale" << endl;
 		}
 		else {
-			cout << "Book ID\tTitle\tAuthor name\tOriginal price\tDiscount price" << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Book ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "Title";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Author name";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Original price";
+			cout << left << setw(widthArr[4]) << setfill(' ') << "Discount price";
+			cout << endl;
 			while (rset->next()) {
-				cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getString("author_name") << "\t" << rset->getDouble("original_price") << "\t" << rset->getDouble("disc_price") << endl;
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("book_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getString("title");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getString("author_name");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getDouble("original_price");
+				cout << left << setw(widthArr[4]) << setfill(' ') << rset->getDouble("disc_price");
+				cout << endl;
 			}
 		}
 		delete pstmt;
@@ -231,10 +355,11 @@ int searchBook(string bookTitle, string bookAuthor) {
 		ResultSet *rset = pstmt->executeQuery();
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There is no book with matching title and author in the database, therefore the amount in the inventory is 0" << endl;
+			cout << endl << "There is no book with matching title and author in the database, therefore the amount in the inventory is 0" << endl;
 		}
 		else {
 			rset->next();
+			cout << endl;
 			cout << rset->getString("title") << " by " << rset->getString("author_name") << " has " << rset->getUInt("amount") << " copies in the inventory" << endl;
 		}
 		delete pstmt;
@@ -264,15 +389,31 @@ int showSuppliersOfBook(string bookTitle, string bookAuthor) {
 														 ") AS supplied_books "
 														 "LEFT JOIN suppliers ON suppliers.supp_id = supplied_books.supp_id;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[6] = { 14, 16, 8, 15, 10, 8 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 6);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There is no book with matching title and author in the database" << endl;
+			cout << endl << "There is no book with matching title and author in the database" << endl;
 		}
 		else {
-			cout << "Supplier ID\tSupplier name\tPhone\tBank account\tBook ID\tPrice" << endl;
-		}
-		while (rset->next()) {
-			cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << "\t" << rset->getUInt("book_id") << "\t" << rset->getDouble("price") << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Supplier ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "Supplier name";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Phone";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Bank account";
+			cout << left << setw(widthArr[4]) << setfill(' ') << "Book ID";
+			cout << left << setw(widthArr[5]) << setfill(' ') << "Price";
+			cout << endl;
+			while (rset->next()) {
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("supp_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getString("supp_name");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getString("phone");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getString("bank_acc");
+				cout << left << setw(widthArr[4]) << setfill(' ') << rset->getUInt("book_id");
+				cout << left << setw(widthArr[5]) << setfill(' ') << rset->getDouble("price");
+				cout << endl;
+			}
 		}
 		delete pstmt;
 		delete rset;
@@ -308,9 +449,10 @@ int booksSold(string bookTitle, string bookAuthor, string fromDate) {
 		rset->beforeFirst();
 		rset->next();
 		if (rset->isNull("title") || rset->isNull("author_name")) {
-			cout << "No such book has been sold" << endl;
+			cout << endl << "No such book has been sold" << endl;
 		}
 		else {
+			cout << endl;
 			cout << rset->getString("title") << " by " << rset->getString("author_name") << " sold " << rset->getInt("books_sold") << " copies since " << fromDate << endl;
 		}
 		delete pstmt;
@@ -342,9 +484,10 @@ int booksPurchased(unsigned int custID, string fromDate) {
 		rset->beforeFirst();
 		rset->next();
 		if (rset->getInt("tot_books") == 0) {
-			cout << "There are no purchases made by the customer" << endl;
+			cout << endl << "There are no purchases made by the customer" << endl;
 		}
 		else {
+			cout << endl;
 			cout << "The customer made " << rset->getInt("tot_books") << " purchases, and bought " << rset->getInt("diff_books") << " different books" << endl;
 		}
 		delete pstmt;
@@ -366,7 +509,7 @@ int mostPurchasesCustomer(string fromDate) {
 	}
 	try {
 		Connection *con = db.getConnection();
-		PreparedStatement *pstmt = con->prepareStatement("SELECT * "
+		PreparedStatement *pstmt = con->prepareStatement("SELECT top_cust.cust_id, book_amount, first_name, last_name, phone "
 														 "FROM ( "
 														 "	SELECT * "
 														 "	FROM ( "
@@ -383,14 +526,28 @@ int mostPurchasesCustomer(string fromDate) {
 														 ") AS top_cust "
 														 "LEFT JOIN customers ON customers.cust_id = top_cust.cust_id;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[5] = { 14, 13, 12, 8, 9 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 5);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There are no customers who made a purchase" << endl;
+			cout << endl << "There are no customers who made a purchase" << endl;
 		}
 		else {
-			cout << "Customer ID\tFirst name\tLast name\tPhone\tAmount" << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Customer ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "First name";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Last name";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Phone";
+			cout << left << setw(widthArr[4]) << setfill(' ') << "Amount";
+			cout << endl;
 			while (rset->next()) {
-				cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << "\t" << rset->getString("phone") << "\t" << rset->getUInt("book_amount") << endl;
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("cust_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getString("first_name");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getString("last_name");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getString("phone");
+				cout << left << setw(widthArr[4]) << setfill(' ') << rset->getUInt("book_amount");
+				cout << endl;
 			}
 		}
 		delete pstmt;
@@ -412,7 +569,7 @@ int mostOrdersSuplier(string fromDate) {
 	}
 	try {
 		Connection *con = db.getConnection();
-		PreparedStatement *pstmt = con->prepareStatement("SELECT * "
+		PreparedStatement *pstmt = con->prepareStatement("SELECT amount, max_supp.supp_id, supp_name, phone, bank_acc "
 														 "FROM ( "
 														 "	SELECT * "
 														 "	FROM ( "
@@ -426,14 +583,28 @@ int mostOrdersSuplier(string fromDate) {
 														 ") AS max_supp "
 														 "LEFT JOIN suppliers ON suppliers.supp_id = max_supp.supp_id;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[5] = { 14, 16, 8, 15, 9 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 5);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There are no orders from any supplier" << endl;
+			cout << endl << "There are no orders from any supplier" << endl;
 		}
 		else {
-			cout << "Supplier ID\tSupplier name\tPhone\tBank account\tAmount" << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Supplier ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "Supplier name";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Phone";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Bank account";
+			cout << left << setw(widthArr[4]) << setfill(' ') << "Amount";
+			cout << endl;
 			while (rset->next()) {
-				cout << rset->getUInt("supp_id") << "\t" << rset->getString("supp_name") << "\t" << rset->getString("phone") << "\t" << rset->getString("bank_acc") << "\t" << rset->getUInt("amount") << endl;
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("supp_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getString("supp_name");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getString("phone");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getString("bank_acc");
+				cout << left << setw(widthArr[4]) << setfill(' ') << rset->getUInt("amount");
+				cout << endl;
 			}
 		}
 		delete pstmt;
@@ -465,9 +636,10 @@ int ordersMade(string fromDate, string tilDate) {
 		rset->beforeFirst();
 		rset->next();
 		if (rset->getInt("orders_amount") == 0) {
-			cout << "No orders were made" << endl;
+			cout << endl << "No orders were made" << endl;
 		}
 		else {
+			cout << endl;
 			cout << rset->getInt("orders_amount") << " orders were made, and " << rset->getInt("books_amount_ordered") << " books were ordered" << endl;
 		}
 		delete pstmt;
@@ -499,9 +671,10 @@ int ordersMadePurchases(string fromDate, string tilDate) {
 		rset->beforeFirst();
 		rset->next();
 		if (rset->getInt("orders_amount") == 0) {
-			cout << "No orders were made by customers" << endl;
+			cout << endl << "No orders were made by customers" << endl;
 		}
 		else {
+			cout << endl;
 			cout << rset->getInt("orders_amount") << " orders were made, and " << rset->getInt("books_amount_ordered") << " books were ordered" << endl;
 		}
 		delete pstmt;
@@ -536,9 +709,10 @@ int totalDiscountCustomer(unsigned int custID, string fromDate) {
 		rset->beforeFirst();
 		rset->next();
 		if (rset->isNull("total_disc")) {
-			cout << "The customer didn't made any purchases since the date" << endl;
+			cout << endl << "The customer didn't made any purchases since the date" << endl;
 		}
 		else {
+			cout << endl;
 			cout << "The total discount the customer received is " << rset->getInt("total_disc") << endl;
 		}
 		delete pstmt;
@@ -603,9 +777,10 @@ int sumRevenue(string y) {
 		rset->beforeFirst();
 		rset->next();
 		if (rset->isNull("tot_Q1") && rset->isNull("tot_Q2") && rset->isNull("tot_Q3") && rset->isNull("tot_Q4")) {
-			cout << "The store didn't operate in that year" << endl;
+			cout << endl << "The store didn't operate in that year" << endl;
 		}
 		else {
+			cout << endl;
 			cout << "the total revenue is:" << endl;
 			for (unsigned int i = 1; i <= 4; i++) {
 				cout << "Q" << i << ": ";
@@ -655,9 +830,10 @@ int customersAdded(string fromDate) {
 		rset->beforeFirst();
 		rset->next();
 		if (rset->getUInt("new_custs") == 0) {
-			cout << "There are no new customers" << endl;
+			cout << endl << "There are no new customers" << endl;
 		}
 		else {
+			cout << endl;
 			cout << "The number of new customers since " + fromDate + " is " << rset->getInt("new_custs") << endl;
 		}
 		delete pstmt;
@@ -689,9 +865,10 @@ int totalPaidSupplier(unsigned int suppID, string fromDate, string tilDate) {
 		rset->beforeFirst();
 		rset->next();
 		if (rset->isNull("tot_shekels")) {
-			cout << "There were no orders from the supplier" << endl;
+			cout << endl << "There were no orders from the supplier" << endl;
 		}
 		else {
+			cout << endl;
 			cout << "The total amount paid to the supplier is " << rset->getInt("tot_shekels") << endl;
 		}
 		delete pstmt;
@@ -723,13 +900,11 @@ int totalSoldSeller(unsigned int sellID, string fromDate, string tilDate) {
 		rset->beforeFirst();
 		rset->next();
 		if (rset->isNull("tot_shekels")) {
-			cout << "There are no purchases with that seller" << endl;
+			cout << endl << "There are no purchases with that seller" << endl;
 		}
 		else {
+			cout << endl;
 			cout << "The total amount is " << rset->getInt("tot_shekels") << endl;
-		}
-		while (rset->next()) {
-			cout << rset->getUInt("cust_id") << "\t" << rset->getString("first_name") << "\t" << rset->getString("last_name") << rset->getString("phone") << endl;
 		}
 		delete pstmt;
 		delete rset;
@@ -764,15 +939,27 @@ int top10Books(string fromDate, string tilDate) {
 														 "ORDER BY amount DESC "
 														 "LIMIT 10;");
 		ResultSet *rset = pstmt->executeQuery();
+		int widthArr[4] = { 10, 8, 9, 9 };
+		rset->beforeFirst();
+		widths(rset, widthArr, 4);
 		rset->beforeFirst();
 		if (rset->rowsCount() == 0) {
-			cout << "There were no purchase in that time" << endl;
+			cout << endl << "There were no purchase in that time" << endl;
 		}
 		else {
-			cout << "Book ID\tTitle\tAuthor name\tAmount" << endl;
-		}
-		while (rset->next()) {
-			cout << rset->getUInt("book_id") << "\t" << rset->getString("title") << "\t" << rset->getString("author_name") << "\t" << rset->getString("amount") << endl;
+			cout << endl;
+			cout << left << setw(widthArr[0]) << setfill(' ') << "Book ID";
+			cout << left << setw(widthArr[1]) << setfill(' ') << "Title";
+			cout << left << setw(widthArr[2]) << setfill(' ') << "Author";
+			cout << left << setw(widthArr[3]) << setfill(' ') << "Amount";
+			cout << endl;
+			while (rset->next()) {
+				cout << left << setw(widthArr[0]) << setfill(' ') << rset->getUInt("book_id");
+				cout << left << setw(widthArr[1]) << setfill(' ') << rset->getString("title");
+				cout << left << setw(widthArr[2]) << setfill(' ') << rset->getString("author_name");
+				cout << left << setw(widthArr[3]) << setfill(' ') << rset->getString("amount");
+				cout << endl;
+			}
 		}
 		delete pstmt;
 		delete rset;
