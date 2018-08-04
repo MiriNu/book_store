@@ -233,21 +233,21 @@ int showPurchases(string fromDate, string tilDate) {
 	try {
 		Connection *con = db.getConnection();
 		PreparedStatement *pstmt = con->prepareStatement("SELECT purch_id, book_id, title, seller_id, seller_name, customers.cust_id, customers.first_name, purch_date, canceled, cust_pay "
+														 "FROM ( "
+														 "	SELECT purch_id, book_id, title, sellers.seller_id, sellers.first_name seller_name, cust_id, purch_date, canceled, cust_pay "
 														 "	FROM ( "
-														 "		SELECT purch_id, book_id, title, sellers.seller_id, sellers.first_name seller_name, cust_id, purch_date, canceled, cust_pay "
+														 "		SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, canceled, cust_pay "
 														 "		FROM ( "
-														 "			SELECT purch_id, purch.book_id, books.title, seller_id, cust_id, purch_date, canceled, cust_pay "
-														 "			FROM ( "
-														 "				SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0, 'No', 'Yes') AS canceled, origin_price, cust_pay "
-														 "				FROM purchases "
-														 "				WHERE (purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') "
-														 "			) AS purch "
-														 "			LEFT JOIN books ON books.book_id = purch.book_id "
-														 "		) AS answer "
-														 "		LEFT JOIN sellers ON answer.seller_id = sellers.seller_id "
-														 "	) AS ans_with_sellername "
-														 "	LEFT JOIN customers ON customers.cust_id = ans_with_sellername.cust_id "
-														 "	ORDER BY purch_id;");
+														 "			SELECT purch_id, book_id, seller_id, cust_id, purch_date, IF(canceled = 0, 'No', 'Yes') AS canceled, origin_price, cust_pay "
+														 "			FROM purchases "
+														 "			WHERE (purch_date BETWEEN '" + fromDate + "' AND '" + tilDate + "') "
+														 "		) AS purch "
+														 "		LEFT JOIN books ON books.book_id = purch.book_id "
+														 "	) AS answer "
+														 "	LEFT JOIN sellers ON answer.seller_id = sellers.seller_id "
+														 ") AS ans_with_sellername "
+														 "LEFT JOIN customers ON customers.cust_id = ans_with_sellername.cust_id "
+														 "ORDER BY purch_id;");
 		ResultSet *rset = pstmt->executeQuery();
 		int widthArr[10] = { 14, 10, 8, 12, 14, 14, 16, 16, 11, 10 };
 		rset->beforeFirst();
